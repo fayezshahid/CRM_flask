@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+  <!-- Horizontal Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+      <span class="navbar-text">
+        {{ username }}
+      </span>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <form action="{{ url_for('logout') }}" method="post">
+              <button type="submit" class="btn btn-outline-primary">Logout</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Vertical Navbar -->
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            {% if role == 1 %}
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#adminCollapse">
+                Admin
+              </a>
+              <div id="adminCollapse" class="collapse">
+                <ul class="nav flex-column ml-3">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('employees') }}">Employee Details</a>
+                    <a class="nav-link" href="{{ url_for('chat') }}">Chat</a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            
+            {% if role == 2 %}
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#salesCollapse">
+                Sales
+              </a>
+              <div id="salesCollapse" class="collapse">
+                <ul class="nav flex-column ml-3">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chat') }}">Chat</a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            
+            {% if role == 3 %}
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#operationsCollapse">
+                Operations
+              </a>
+              <div id="operationsCollapse" class="collapse">
+                <ul class="nav flex-column ml-3">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chat') }}">Chat</a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+
+            {% if role == 4 %}
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#designerCollapse">
+                Designer/Developer
+              </a>
+              <div id="designerCollapse" class="collapse">
+                <ul class="nav flex-column ml-3">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chat') }}">Chat</a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Page Content -->
+      <main role="main" class="col-md-10 ml-sm-auto px-4">
+        {% block content %}
+        {% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  {% block scripts %}
+  {% endblock %}
+</body>
+</html>
