@@ -1,10 +1,10 @@
 {% extends "index.html" %}
 {% block content %}
-    <input type="hidden" id="isActiveElement" value="user">
+    <input type="hidden" id="isActiveElement" value="page">
     <div class="container">
         <div class="d-flex justify-content-between" style="margin: 10px 0;">
-            <h1>Employee Details</h1>
-            <button type="button" data-toggle="modal" data-target="#modal" class="btn btn-success">Add Employee</button>
+            <h1>Pages</h1>
+            <button type="button" data-toggle="modal" data-target="#modal" class="btn btn-success">Add Page</button>
         </div>
         <div class="modal" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: fit-content">
@@ -13,39 +13,22 @@
                         <div>
                             <form id="form">
                                 <div class="form-group">
-                                    <label for="">Username</label>
-                                    <input type="text" id="username" class="form-control" name="username" placeholder="Enter username">
+                                    <label for="">Page Name</label>
+                                    <input type="text" id="name" class="form-control" name="name" placeholder="Enter Page Name">
                                 </div>
                                 <div class="form-group">
-                                    <label for="">Password</label>
-                                    <input type="password" id="password" class="form-control" name="password" placeholder="Enter password">
+                                    <label for="">Page ID</label>
+                                    <input type="text" id="id" class="form-control" name="id" placeholder="Enter Page ID">
                                 </div>
                                 <div class="form-group">
-                                    <label for="role">Role:</label>
-                                    <select class="form-control" id="role" name="role">
-                                        <option value="1">Admin</option>
-                                        <option value="2">Sales</option>
-                                        <option value="3">Operation</option>
-                                        <option value="4">Developer/Designer</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="role">Pages:</label>
-                                    <select style="width: 100% !important;" class="form-control js-example-basic-multiple" id="pages" name="pages[]" multiple="multiple">
-                                        <!-- <option value="1">Admin</option>
-                                        <option value="2">Sales</option>
-                                        <option value="3">Operation</option>
-                                        <option value="4">Developer/Designer</option> -->
-                                        {% for page in pages %}
-                                            <option value="{{ page.id }}">{{ page.name }}</option>
-                                        {% endfor %}
-                                    </select>
+                                    <label for="">Page Access Token</label>
+                                    <input type="password" id="access_token" class="form-control" name="access_token" placeholder="Enter Page Access Token">
                                 </div>
                             </form>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="addEmployee()">Add</button>
+                        <button type="button" class="btn btn-primary" onclick="addPage()">Add</button>
                     </div>
                 </div>
             </div>
@@ -53,10 +36,10 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Paswword</th>
-                    <th>Role</th>
+                    <th>Page Name</th>
+                    <th>Page ID</th>
+                    <th>Page Access Token</th>
+                    <!-- <th>Role</th> -->
                     <th>Action</th>
                 </tr>
             </thead>
@@ -71,30 +54,27 @@
     <script>
 
         $(document).ready(function() {
-            loadEmplooyees()
-            $('.js-example-basic-multiple').select2();
+            loadPages()
         });
 
-        function loadEmplooyees(){
+        function loadPages(){
             $.ajax({
-                url: '/getEmployees',
+                url: '/getPages',
                 type: 'GET',
                 success: function(data) {
                     $('tbody').html('')
                     console.log(data)
                     for(var i=0; i<data.length; i++)
                     {
+                        var displayedToken = data[i].access_token.substr(0, 10) + "........." + data[i].access_token.substr(-10);
                         $('tbody').append(`
                             <tr>
+                                <td>${data[i].name}</td>
                                 <td>${data[i].id}</td>
-                                <td>${data[i].username}</td>
-                                <td>${data[i].password}</td>
-                                <td>${data[i].role}</td>
+                                <td>${displayedToken}</td>
                                 <td>
                                     <button type="button" data-toggle="modal" data-target="#modal${data[i].id}" class="btn btn-warning">Edit</button>
-                                    ${data[i].role_id != 1 ? `
-                                        <button type="button" onclick="deleteEmployee('${data[i].id}')" class="btn btn-danger">Delete</button>
-                                    ` : ''}
+                                    <button type="button" onclick="deletePage('${data[i].id}')" class="btn btn-danger">Delete</button>
                                     <div class="modal" id="modal${data[i].id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: fit-content">
                                             <div class="modal-content" style="width: 600px  ">
@@ -102,27 +82,22 @@
                                                     <div>
                                                         <form id="form${data[i].id}">
                                                             <div class="form-group">
-                                                                <label for="">Username</label>
-                                                                <input type="text" id="username${data[i].id}" class="form-control" name="username" value="${data[i].username}" placeholder="Enter username">
+                                                                <label for="">Name</label>
+                                                                <input type="text" id="name${data[i].id}" class="form-control" name="name" value="${data[i].name}" placeholder="Enter Page Name">
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="">Password</label>
-                                                                <input type="password" id="password${data[i].id}" class="form-control" name="password" value="${data[i].password}" placeholder="Enter password">
+                                                                <input type="text" id="id${data[i].id}" class="form-control" name="id" value="${data[i].id}" placeholder="Enter Page ID">
                                                             </div>
                                                             <div class="form-group">
-                                                                <label for="role">Role:</label>
-                                                                <select class="form-control" id="role" name="role">
-                                                                    <option ${data[i].role_id == 1 ? 'selected' : ''} value="1">Admin</option>
-                                                                    <option ${data[i].role_id == 2 ? 'selected' : ''} value="2">Sales</option>
-                                                                    <option ${data[i].role_id == 3 ? 'selected' : ''} value="3">Operation</option>
-                                                                    <option ${data[i].role_id == 4 ? 'selected' : ''} value="4">Developer/Designer</option>
-                                                                </select>
+                                                                <label for="">Password</label>
+                                                                <input type="text" id="access_token${data[i].id}" class="form-control" name="access_token" value="${data[i].access_token}" placeholder="Enter Page Access Token">
                                                             </div>
                                                         </form>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-primary" onclick="editEmployee('${data[i].id}')">Edit</button>
+                                                    <button type="button" class="btn btn-primary" onclick="editPage('${data[i].id}')">Edit</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -135,19 +110,19 @@
             });
         }
 
-        function addEmployee(){
+        function addPage(){
             //fetch data from form
             var form = document.getElementById('form');            
             $.ajax({
-                url: '/addEmployee',
+                url: '/addPage',
                 type: 'POST',
                 data: new FormData(form),
                 processData: false,
                 contentType: false,
                 success: function(data) {
                     $('#modal').modal('hide')
-                    toastr.success('User Added');
-                    loadEmplooyees();
+                    toastr.success('Page Added');
+                    loadPages();
                     $('#form').trigger("reset");
                 },
                 error: function(error) {
@@ -156,18 +131,18 @@
             });
         }
 
-        function editEmployee(id){
+        function editPage(id){
             var form = document.getElementById('form' + id);
             $.ajax({
-                url: '/editEmployee/' + id,
+                url: '/editPage/' + id,
                 type: 'POST',
                 data: new FormData(form),
                 processData: false,
                 contentType: false,
                 success: function(data) {
                     $('#modal' + id).modal('hide')
-                    toastr.success('User Edited');
-                    loadEmplooyees()
+                    toastr.success('Page Edited');
+                    loadPages()
                 },
                 error: function(error) {
                     toastr.error(error);
@@ -175,13 +150,13 @@
             });
         }
 
-        function deleteEmployee(id){
+        function deletePage(id){
             $.ajax({
-                url: '/deleteEmployee/' + id,
+                url: '/deletePage/' + id,
                 type: 'POST',
                 success: function(data) {
-                    toastr.success('User Deleted');
-                    loadEmplooyees()
+                    toastr.success('Page Deleted');
+                    loadPages()
                 },
                 error: function(error) {
                     toastr.error(error);

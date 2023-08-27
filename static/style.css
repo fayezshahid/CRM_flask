@@ -1,7 +1,12 @@
+.icons i{
+    font-size: 30px;
+}
+
 .sidebar {
     height: 94vh;
     background-color: #343a40;
     color: #fff;
+    padding-left: 4px !important;
 }
 
 .navbar {
@@ -22,7 +27,46 @@
 }
 
 .sidebar .nav-item {
-    padding-left: 20px;
+    /* padding-left: 20px; */
+}
+
+.icons{
+    margin-top: 10px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.icons.active{
+    border: #c3bdbd 2px solid;
+    border-radius: 5px;
+    background-color: #c3bdbd;
+    color: black;
+}
+
+
+/* .icon-text{
+    display: flex !important;
+    float: right;
+    padding-right: 50px;
+} */
+
+.sidebar{
+    /* max-width: 160px !important; */
+    max-width: 63px !important;
+}
+
+.icon-text{
+    display: none;
+}
+
+.sidebar:hover{
+    max-width: 100% !important;
+}
+
+.sidebar:hover .icon-text {
+    display: flex !important;
+    float: right;
+    padding-right: 10px;
 }
 
 /* message */
@@ -79,20 +123,72 @@ input[type="radio"] {
     font-size: 13px;
 }
 
+/* conversations */
 
 .list-group li{
-    margin-bottom: 10px;
-    border-radius: 25px;
+    /* margin-bottom: 10px; */
+    /* border-radius: 25px; */
+    height: 75px;
+    border: 0px;
+    padding: 15px 15px;
+    cursor: pointer;
+    background-color: inherit;
 }
 
+.conversation_list{
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.conversation.selected {
+    background-color: #f5f5f5;
+    border-right: 3px solid #763ee6;
+}
+
+.conversation:hover {
+    background-color: #f5f5f5;
+}
+
+.last_message{
+    font-size: 13px;
+    color: gray;
+    font-style: italic;
+}
+
+.timestamp{
+    font-size: 13px;
+    color: gray;
+    float: right;
+}
 
 .tabs {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
+    padding: 10px;
+}
+
+.tab-pills{
+    /* border: #dee2e6 1px solid; */
+    /* background-color: #dee2e6; */
+    font-size: 17px;
+    border-radius: 5px;
+    padding: 0 5px;
+    cursor: pointer;
+    padding: 8px 15px;
+    margin-left: 10px;
+}
+
+.tab-pills:hover{
+    background-color: #c3bdbd;
+}
+
+.tab-pills.active{
+    background-color: #c3bdbd;
 }
 
 body {
@@ -121,4 +217,41 @@ nav {
 
 .messages.active {
     display: block;
+}
+
+.filter-box{
+    height: 20%;
+    padding: 20px;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.filter-pills{
+    border: #dee2e6 1px solid;
+    background-color: #dee2e6;
+    border-radius: 5px;
+    padding: 0 5px;
+    cursor: pointer;
+}
+
+.filter-pills:hover{
+    background-color: #c3bdbd;
+}
+
+.conversation-box{
+    max-height: 80%;
+    overflow-y: scroll;
+}
+
+.contact-details{
+    padding: 10px;
+    font-size: 13px;
+}
+
+.contact-details a{
+    color: #007bff !important;
+}
+
+.contact-details a:hover{
+    text-decoration: underline !important;
+    cursor: pointer;
 }

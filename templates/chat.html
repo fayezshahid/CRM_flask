@@ -1,15 +1,46 @@
 {% extends "index.html" %}
 {% block content %}
-  <div class="container">
-    <div class="row" style="margin-top: 50px;">
-        <div class="col-md-4" style="padding: 0;">
+  <input type="hidden" id="isActiveElement" value="chat">
+  <div class="row" style="margin-top: 10px;">
+    <div class="col-2">
+      <select onchange="changePage(this.value)" class="form-control" name="" id="changePage">
+        {% for page in pages %}
+        <option value="{{ page.id }},{{ page.access_token }}">{{ page.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div style="margin-right: 0; margin-top: 10px; margin-left: 0; padding: 0 20px;">
+    {% if role == 1 %}
+    <div class="row">
+      <div class="col-10" style="border: 1px solid rgba(0,0,0,.125);">
+        <div class="tabs">
+          <div class="tab-pills" id="all" onclick="switchTab(this.id)">
+            All Messages
+          </div>
+          <div class="tab-pills" id="fb" onclick="switchTab(this.id)">
+            Messenger
+          </div>
+          <div class="tab-pills" id="insta" onclick="switchTab(this.id)">
+            Instagram
+          </div>
+        </div>
+      </div>
+      <div class="col-2">
+
+      </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-3" style="padding: 0;">
           <div class="card">
-            <div style="height: 75vh; overflow-y: scroll;" class="card-body">
+            <div style="height: 75vh; padding: 0" class="card-body">
                 <!-- <div class="d-flex justify-content-between align-items-center">
                   <h5>Previous Chats</h5>
                   <button type="button" class="btn btn-outline-primary" style="margin-bottom: 10px;" onclick="newChat()">+ New Chat</button>
                 </div> -->
-                {% if role == 1 %}
+
+                <!-- {% if role == 1 %}
                 <nav>
                   <ul class="tabs">
                     <li id="all-tab" onclick="switchToAll()" class="active">All</li>
@@ -17,18 +48,37 @@
                     <li id="instagram-tab" onclick="switchToInsta()">Instagram</li>
                   </ul>
                 </nav>
-                {% endif %}
-                <ul class="list-group" id="chats">
-                  <!-- <li class="list-group-item bot-bubble rounded-bubble">Hi, how can I help you?</li> -->
-                  <!-- <div class="list-group-item bot-bubble rounded-bubble">
-                    <p></p>
-                    <i class="fa fa-user"></i>
-                  </div> -->
-                </ul>
+                {% endif %} -->
+                <div class="filter-box">
+                  <input type="text" class="form-control" placeholder="Search">
+                  <div class="d-flex justify-content-between" style="padding: 10px 15px 0 15px;">
+                    <div class="filter-pills">
+                      Unread
+                    </div>
+                    <div class="filter-pills">
+                      Important
+                    </div>
+                    <div class="filter-pills">
+                      Done
+                    </div>
+                    <div class="filter-pills">
+                      Spam
+                    </div>
+                  </div>
+                </div>
+                <div class="conversation-box">
+                  <ul class="list-group" id="chats">
+                    <!-- <li class="list-group-item bot-bubble rounded-bubble">Hi, how can I help you?</li> -->
+                    <!-- <div class="list-group-item bot-bubble rounded-bubble">
+                      <p></p>
+                      <i class="fa fa-user"></i>
+                    </div> -->
+                  </ul>
+                </div>
             </div>
           </div>
         </div>
-        <div class="col-md-8" style="padding: 0;">
+        <div class="col-7" style="padding: 0;">
           <div class="card">
             <div style="height: 75vh" class="card-body">
               <div class="chat-header">
@@ -55,8 +105,27 @@
             </div>
           </div>
         </div>
+        <div class="col-2" style="border: 1px solid rgba(0,0,0,.125); display: none;" id="contact-card">
+          <div style="border-bottom: 1px solid black; font-size: 20px; padding: 15px 0; margin-bottom: 20px;" id="contact-name">
+            Fayez Shahid
+          </div>
+          <div>
+            <div>
+              <b>About</b>
+            </div>
+            <div id="contact-info">
+              <p style="color: gray;">Add details about people, like contact information</p>
+            </div>
+            <!-- <div id="contact-info"> -->
+              <button class="btn btn-secondary" id="addContactBtn" data-toggle="modal" data-target="#contactModal">Add details</button>
+            <!-- </div> -->
+          </div>
+        </div>
       </div>
     </div>
+    <!-- <div class="container">
+      <p>Hello</p>
+    </div> -->
   </div>
 
   <div class="modal" id="allowToEnterChatModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -75,32 +144,298 @@
         </div>
     </div>
   </div>
+
+  <div class="modal" id="contactModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+              <form id="contactForm">
+                <div class="form-group">
+                  <label for="">Phone</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="phone" id="">
+                </div>
+                <div class="form-group">
+                  <label for="">Email</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="email" id="">
+                </div>
+                <div class="form-group">
+                  <label for="">Birthtday</label> - <span style="color: gray;">Optional</span>
+                  <div class="input-group">
+
+                    <select class="form-control" name="month" id="">
+                      <option value="0" selected>Month</option>
+                      <option value="January">January</option>
+                      <option value="February">February</option>
+                      <option value="March">March</option>
+                      <option value="April">April</option>
+                      <option value="May">May</option>
+                      <option value="June">June</option>
+                      <option value="July">July</option>
+                      <option value="August">August</option>
+                      <option value="September">September</option>
+                      <option value="October">October</option>
+                      <option value="November">November</option>
+                      <option value="December">December</option>
+                    </select>
+
+                    <select class="form-control" name="day" id="">
+                      <option value="0" selected>Day</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                      <option value="13">13</option>
+                      <option value="14">14</option>
+                      <option value="15">15</option>
+                      <option value="16">16</option>
+                      <option value="17">17</option>
+                      <option value="18">18</option>
+                      <option value="19">19</option>
+                      <option value="20">20</option>
+                      <option value="21">21</option>
+                      <option value="22">22</option>
+                      <option value="23">23</option>
+                      <option value="24">24</option>
+                      <option value="25">25</option>
+                      <option value="26">26</option>
+                      <option value="27">27</option>
+                      <option value="28">28</option>
+                      <option value="29">29</option>
+                      <option value="30">30</option>
+                      <option value="31">31</option>
+                    </select>
+
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="">Address</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="address" id="">
+                </div>
+                <div class="form-group">
+                  <label for="">City</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="city" id="">
+                </div>
+                <div class="input-group justify-content-between">
+                  <div class="form-group">
+                    <label for="">State</label> - <span style="color: gray;">Optional</span>
+                    <input type="text" class="form-control" name="state" id="">
+                  </div>
+                  <div class="form-group">
+                    <label for="">Zip/postal code</label> - <span style="color: gray;">Optional</span>
+                    <input type="text" class="form-control" name="postalCode" id="">
+                  </div>
+                </div>
+                <button type="button" onclick="addContact()" style="float: right ;" class="btn btn-primary">Save</button>
+              </form>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="modal" id="editContactModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+              <form id="editContactForm">
+                <div class="form-group">
+                  <label for="">Phone</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="phone" id="">
+                </div>
+                <div class="form-group">
+                  <label for="">Email</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="email" id="">
+                </div>
+                <div class="form-group">
+                  <label for="">Birthtday</label> - <span style="color: gray;">Optional</span>
+                  <div class="input-group">
+
+                    <select class="form-control" name="month" id="">
+                      <option value="0" selected>Month</option>
+                      <option value="January">January</option>
+                      <option value="February">February</option>
+                      <option value="March">March</option>
+                      <option value="April">April</option>
+                      <option value="May">May</option>
+                      <option value="June">June</option>
+                      <option value="July">July</option>
+                      <option value="August">August</option>
+                      <option value="September">September</option>
+                      <option value="October">October</option>
+                      <option value="November">November</option>
+                      <option value="December">December</option>
+                    </select>
+
+                    <select class="form-control" name="day" id="">
+                      <option value="0" selected>Day</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                      <option value="13">13</option>
+                      <option value="14">14</option>
+                      <option value="15">15</option>
+                      <option value="16">16</option>
+                      <option value="17">17</option>
+                      <option value="18">18</option>
+                      <option value="19">19</option>
+                      <option value="20">20</option>
+                      <option value="21">21</option>
+                      <option value="22">22</option>
+                      <option value="23">23</option>
+                      <option value="24">24</option>
+                      <option value="25">25</option>
+                      <option value="26">26</option>
+                      <option value="27">27</option>
+                      <option value="28">28</option>
+                      <option value="29">29</option>
+                      <option value="30">30</option>
+                      <option value="31">31</option>
+                    </select>
+
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="">Address</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="address" id="">
+                </div>
+                <div class="form-group">
+                  <label for="">City</label> - <span style="color: gray;">Optional</span>
+                  <input type="text" class="form-control" name="city" id="">
+                </div>
+                <div class="input-group justify-content-between">
+                  <div class="form-group">
+                    <label for="">State</label> - <span style="color: gray;">Optional</span>
+                    <input type="text" class="form-control" name="state" id="">
+                  </div>
+                  <div class="form-group">
+                    <label for="">Zip/postal code</label> - <span style="color: gray;">Optional</span>
+                    <input type="text" class="form-control" name="postalCode" id="">
+                  </div>
+                </div>
+                <button type="button" onclick="editContact()" style="float: right ;" class="btn btn-primary">Save</button>
+              </form>
+            </div>
+        </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    var page_id, insta_id, access_token;
+
     $(document).ready(function(){
-      getConversations('all')
+      arr = $('#changePage').val().split(',')
+      page_id = arr[0]
+      access_token = arr[1]
+      // console.log(page_id, access_token)
+      switchTab(page_id, access_token, 'all')
+      // getIds()
+      $('[data-toggle="tooltip"]').tooltip();
     })
-    // console.log($('button'))
-    function getConversations(platform){
+
+    function getIds(){
+      $.ajax({
+        url: '/getIds',
+        type: 'GET',
+        async: false,
+        success: function(data) {
+          // console.log(data);
+          page_id = data['page_id'];
+          insta_id = data['insta_id'];
+        },
+        error: function() {
+          console.log('Error fetching IDs');
+        }
+      });
+    }
+    
+    function getConversations(page_id, access_token, platform){
       $('#chats').html('');
-      $.get('/getConversations/' + platform, function(data){
+      $.get('/getConversations/' + page_id + '/' + access_token + '/' + platform, function(data){
         console.log(data)
         for(var i=0; i<data.length; i++){
+          
+          const currentDate = new Date();
+          const timestamp = new Date(data[i].timestamp);
+          // Calculate the time difference in milliseconds between the two dates
+          const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp);
+
+          // Calculate the number of days between the two dates
+          const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+          // console.log(daysDifference)
+          if (daysDifference < 1){
+            const options = {
+              // weekday: 'short',
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true
+            };
+            formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp);
+          }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+            const options = {
+              weekday: 'short',
+              // hour: 'numeric',
+              // minute: 'numeric',
+              // hour12: true
+            };
+            formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp); // Output: Wed 6:14 PM
+          } else {
+            // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
+            formattedDate = new Intl.DateTimeFormat('en-US', {
+              // year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              // hour: 'numeric',
+              // minute: 'numeric',
+              // hour12: true
+            }).format(timestamp);
+          }
+
+          let lastMessage = data[i].last_message;
+          if(data[i].sender == page_id || data[i].sender == insta_id){
+            lastMessage = 'You: ' + lastMessage;
+          }
           $('#chats').append(`
-             <li class="list-group-item bot-bubble rounded-bubble d-flex justify-content-between" style="cursor: pointer;" id="chat${data[i].id}" onclick="getMessages('${data[i].id}')">${data[i].name}
+            <div class="conversation">
+              <li class="list-group-item bot-bubble rounded-bubble" id="chat${data[i].id}" onclick="getMessages('${data[i].id}')">${data[i].name}
+              <span class="timestamp">${formattedDate}</span>  
+              <div class="last_message">${lastMessage}</div>
+            </div>
           `)
           // console.log(name)
+          // console.log(page_id, insta_id)
         }
       });
     }
 
     var current_recipient_id = 0;
     var current_conversation_id;
+    var current_user_id;
+    var current_user_name;
 
     function getMessages(id){
       // current_recipient_id = id;
+      $('.conversation').removeClass('selected');
+      // Add 'selected' class to the clicked conversation
+      $('#chat' + id).parent().addClass('selected');
+      // console.log($(this))
       current_conversation_id = id;
       console.log(id);
       $('.chat-box').html('');
@@ -109,10 +444,51 @@
       $('.chat-box').show();
       $.get('/getMessages/' + id, function(data){
         console.log(data)
+        current_user_id = data[0].id;
+        current_user_name = data[0].name;
+        $('#contact-name').html(current_user_name)
+        // console.log(data[2])
+        if(data[2]){
+          $('#contact-info').html(`
+            <div class="contact-details">
+              <div class="d-flex justify-content-between">
+                <p>Added Details</p>
+                <a data-toggle="modal" data-target="#editContactModal">Edit</a>
+              </div>
+              <p><b>Phone: </b>${data[2].phone}</p>
+              <p><b>Email: </b>${data[2].email}</p>
+              <p><b>Birthday: </b>${data[2].month !== '0' && data[2].day !== '0' ? data[2].month + ' ' + data[2].day : ''}</p>
+              <p><b>Address: </b>${data[2].address}</p>
+            </div>
+          `)
+          $('#addContactBtn').hide()
+          $("#editContactForm input[name='phone']").val(data[2].phone);
+          $("#editContactForm input[name='email']").val(data[2].email);
+          $("#editContactForm select[name='month']").val(data[2].month);
+          $("#editContactForm select[name='day']").val(data[2].day);
+          $("#editContactForm input[name='address']").val(data[2].address);
+          $("#editContactForm input[name='city']").val(data[2].city);
+          $("#editContactForm input[name='state']").val(data[2].state);
+          $("#editContactForm input[name='postalCode']").val(data[2].postalCode);
+        }
+        else{
+          $('#contact-info').html(`<p style="color: gray;">Add details about people, like contact information</p>`)
+          $('#addContactBtn').show()
+        }
+        $('#contact-card').show()
+        // console.log(current_user_id)
+        // console.log(current_user_name)
         $('.chat-header').html(`
           <div class="d-flex justify-content-between" style="margin-bottom: 10px">
-            <h5 id="chatName">${data[0]}</h5>
-            ${data[1].length ? `<button type="button" id="toggleRadioButtons" onclick="showRadioButtons()" class="btn btn-outline-secondary"><i class="fa-solid fa-share"></i></button>` : ''}
+            <h5 id="chatName">${current_user_name}</h5>
+            <div>
+              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to spam" style="margin-right: 5px;"><i class="fa-solid fa-circle-exclamation"></i></button>
+              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Marks as follow up" style="margin-right: 5px;"><i class="fa-solid fa-star"></i></button>
+              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as unread" style="margin-right: 5px;"><i class="fa-solid fa-envelope"></i></button>
+              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as important" style="margin-right: 5px;"><i class="fa-solid fa-exclamation"></i></button>
+              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to done" style="margin-right: 5px;"><i class="fa-solid fa-check"></i></button>
+              <button type="button" id="toggleRadioButtons" onclick="showRadioButtons()" class="btn btn-outline-secondary"><i class="fa-solid fa-share"></i></button>
+            </div>
           </div>
         `);
         // $('.chat-header').html(`
@@ -131,8 +507,8 @@
 
             const timeDifferenceInMilliseconds = timestamp1 - timestamp2;
             const timeDifferenceInMinutes = timeDifferenceInMilliseconds / (1000 * 60);
-            console.log(timestamp1)
-            console.log(timestamp2)
+            // console.log(timestamp1)
+            // console.log(timestamp2)
             let formattedDate = '';
 
             if (timeDifferenceInMinutes > 3) {
@@ -141,9 +517,17 @@
               const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp1);
 
               // Calculate the number of days between the two dates
-              const daysDifference = timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24);
+              const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
 
-              if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+              if(daysDifference < 1){
+                const options = {
+                  // weekday: 'short',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                  hour12: true
+                };
+                formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1);
+              }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
                 const options = {
                   weekday: 'short',
                   hour: 'numeric',
@@ -397,7 +781,7 @@
 
       $.post('/sendMessage', {'message': message, 'recipient_id': current_recipient_id, 'platform': current_tab}, function(data) {
         console.log(data);
-        getConversations(current_tab);
+        getConversations(page_id , access_token, current_tab);
         getMessages(current_conversation_id);
         $('#message').val('');
         var element = document.querySelector(".chat-box");
@@ -413,9 +797,11 @@
 
     socket.on('message_received', function(data) {
         // Handle the received message from the Flask route
-        console.log('Received message:', data.message);
-        getConversations(current_tab);
-        getMessages(current_conversation_id)
+        console.log('Received conversation id:', data.conversation_id);
+        getConversations(page_id, access_token, current_tab);
+        if(data.conversation_id == current_conversation_id){
+          getMessages(current_conversation_id)
+        }
         // if(current_conversation_id){
         //   $('.chat-box').append(`
         //     <div class='d-flex'>
@@ -434,28 +820,139 @@
 
     var current_tab = 'all';
 
-    function switchToFb(){
-      current_tab = 'fb';
-      $('#instagram-tab').removeClass('active')
-      $('#all-tab').removeClass('active')
-      $('#facebook-tab').addClass('active')
-      getConversations('fb')
+    function switchTab(page_id, access_token, platform){
+      current_tab = platform
+      getConversations(page_id, access_token, current_tab)
+      $('.tab-pills').removeClass('active')
+      $('#' + platform).addClass('active')
     }
 
-    function switchToInsta(){
-      current_tab = 'insta';
-      $('#facebook-tab').removeClass('active')
-      $('#all-tab').removeClass('active')
-      $('#instagram-tab').addClass('active')
-      getConversations('insta')
+    function addContact(){
+      var id = current_user_id;
+      var name = current_user_name;
+      var phone = $("#contactForm input[name='phone']").val();
+      var email = $("#contactForm input[name='email']").val();
+      var month = $("#contactForm select[name='month']").val();
+      var day = $("#contactForm select[name='day']").val();
+      var address = $("#contactForm input[name='address']").val();
+      var city = $("#contactForm input[name='city']").val();
+      var state = $("#contactForm input[name='state']").val();
+      var postalCode = $("#contactForm input[name='postalCode']").val();
+      // console.log(id)
+      // Create an object with the collected data
+      var formData = {
+        id: id,
+        name: name,
+        phone: phone,
+        email: email,
+        month: month,
+        day: day,
+        address: address,
+        city: city,
+        state: state,
+        postalCode: postalCode
+      };
+      console.log(formData)
+      // Send data to the server using AJAX
+      $.ajax({
+          type: "POST",
+          url: "/addContact",
+          contentType: "application/json",
+          data: JSON.stringify(formData),
+          success: function(response) {
+              // Handle the success response from the server
+              toastr.success('Contact added successfully');
+              console.log("Contact added successfully");
+              $('#contactModal').modal('hide');
+
+              $('#contact-info').html(`
+              <div class="contact-details">
+                <div class="d-flex justify-content-between">
+                  <p>Added Details</p>
+                  <a data-toggle="modal" data-target="#editContactModal">Edit</a>
+                </div>
+                <p><b>Phone: </b>${phone}</p>
+                <p><b>Email: </b>${email}</p>
+                <p><b>Birthday: </b>${month !== '0' && day !== '0' ? month + ' ' + day : ''}</p>
+                <p><b>Address: </b>${address}</p>
+              </div>
+            `)
+          },
+          error: function(error) {
+              // Handle any errors that occurred during the AJAX request
+              toastr.error('Error adding contact');
+              console.error("Error adding contact:", error);
+          }
+      });
     }
 
-    function switchToAll(){
-      current_tab = 'all';
-      $('#facebook-tab').removeClass('active')
-      $('#instagram-tab').removeClass('active')
-      $('#all-tab').addClass('active')
-      getConversations('all')
+    function editContact(){
+      var id = current_user_id;
+      var name = current_user_name;
+      var phone = $("#editContactForm input[name='phone']").val();
+      var email = $("#editContactForm input[name='email']").val();
+      var month = $("#editContactForm select[name='month']").val();
+      var day = $("#editContactForm select[name='day']").val();
+      var address = $("#editContactForm input[name='address']").val();
+      var city = $("#editContactForm input[name='city']").val();
+      var state = $("#editContactForm input[name='state']").val();
+      var postalCode = $("#editContactForm input[name='postalCode']").val();
+      // console.log(id)
+      // Create an object with the collected data
+      var formData = {
+        id: id,
+        name: name,
+        phone: phone,
+        email: email,
+        month: month,
+        day: day,
+        address: address,
+        city: city,
+        state: state,
+        postalCode: postalCode
+      };
+      // console.log(formData)
+      // Send data to the server using AJAX
+      $.ajax({
+          type: "POST",
+          url: "/editContact",
+          contentType: "application/json",
+          data: JSON.stringify(formData),
+          success: function(response) {
+            // Handle the success response from the server
+            toastr.success('Contact edited successfully');
+            console.log("Contact edited successfully");
+            $('#editContactModal').modal('hide');
+
+            $('#contact-info').html(`
+              <div class="contact-details">
+                <div class="d-flex justify-content-between">
+                  <p>Added Details</p>
+                  <a data-toggle="modal" data-target="#editContactModal">Edit</a>
+                </div>
+                <p><b>Phone: </b>${phone}</p>
+                <p><b>Email: </b>${email}</p>
+                <p><b>Birthday: </b>${month !== '0' && day !== '0' ? month + ' ' + day : ''}</p>
+                <p><b>Address: </b>${address}</p>
+              </div>
+            `)
+
+          },
+          error: function(error) {
+              // Handle any errors that occurred during the AJAX request
+              toastr.error('Error editing contact');
+              console.error("Error editing contact:", error);
+          }
+      });
+    }
+
+    function changePage(value){
+      console.log(value)
+      var selectedArray = value.split(',');
+      // console.log(selectedArray)
+      page_id = selectedArray[0];
+      access_token = selectedArray[1];
+      switchTab(page_id, access_token, current_tab)
     }
 
 </script>
