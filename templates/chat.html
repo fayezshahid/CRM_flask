@@ -15,13 +15,13 @@
     <div class="row">
       <div class="col-10" style="border: 1px solid rgba(0,0,0,.125);">
         <div class="tabs">
-          <div class="tab-pills" id="all" onclick="switchTab(this.id)">
+          <div class="tab-pills" id="all" onclick="switchTabBtn(this.id)">
             All Messages
           </div>
-          <div class="tab-pills" id="fb" onclick="switchTab(this.id)">
+          <div class="tab-pills" id="fb" onclick="switchTabBtn(this.id)">
             Messenger
           </div>
-          <div class="tab-pills" id="insta" onclick="switchTab(this.id)">
+          <div class="tab-pills" id="insta" onclick="switchTabBtn(this.id)">
             Instagram
           </div>
         </div>
@@ -94,12 +94,17 @@
                     <div class="chat-bubble">How old are you?</div>
                 </div> -->
               </div>
-              <form id="messagingBar" style="display: none;">
-                <div class="form-group d-flex" style="margin-top: 5px;">
-                  <input type="text" id="message" class="form-control" placeholder="Type your message...">
-                  <button type="button" class="btn btn-outline-warning" style="margin-left: 5px;" onclick="triggerFileInput()">Attachment</button>
-                  <input type="file" id="attachmentInput" style="display: none;" onchange="attach(event)">
-                  <button type="button" class="btn btn-outline-primary" style="margin-left: 5px;" onclick="sendMessage()">Send</button>
+              <form id="messagingBar" style="display: none;" onsubmit="return false;">
+                <div class="message-box d-flex">
+                  <input type="text" id="message" placeholder="Type your message..." onkeypress="sendMessage(event)">
+                  <!-- <button type="button" class="btn btn-outline-warning" style="margin-left: 5px;" onclick="triggerFileInput()">Attachment</button> -->
+                  <div class="message-icons">
+                    <i class="fa-solid fa-paperclip" onclick="triggerFileInput()"></i>
+                    <input type="file" id="attachmentInput" style="display: none;" onchange="attach(event)">
+                    <!-- <button type="button" class="btn btn-outline-primary" style="margin-left: 5px;" onclick="sendMessage()">Send</button> -->
+                    <i class="fa-regular fa-message"></i>
+                    <i class="fa-regular fa-face-smile"></i>
+                  </div>
                 </div>
               </form>
             </div>
@@ -346,9 +351,13 @@
       access_token = arr[1]
       // console.log(page_id, access_token)
       switchTab(page_id, access_token, 'all')
-      // getIds()
+      getIds()
       $('[data-toggle="tooltip"]').tooltip();
     })
+
+    function switchTabBtn(platform){
+      switchTab(page_id, access_token, platform)
+    }
 
     function getIds(){
       $.ajax({
@@ -357,7 +366,7 @@
         async: false,
         success: function(data) {
           // console.log(data);
-          page_id = data['page_id'];
+          // page_id = data['page_id'];
           insta_id = data['insta_id'];
         },
         error: function() {
@@ -368,60 +377,66 @@
     
     function getConversations(page_id, access_token, platform){
       $('#chats').html('');
-      $.get('/getConversations/' + page_id + '/' + access_token + '/' + platform, function(data){
-        console.log(data)
-        for(var i=0; i<data.length; i++){
-          
-          const currentDate = new Date();
-          const timestamp = new Date(data[i].timestamp);
-          // Calculate the time difference in milliseconds between the two dates
-          const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp);
 
-          // Calculate the number of days between the two dates
-          const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-          // console.log(daysDifference)
-          if (daysDifference < 1){
-            const options = {
-              // weekday: 'short',
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true
-            };
-            formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp);
-          }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
-            const options = {
-              weekday: 'short',
-              // hour: 'numeric',
-              // minute: 'numeric',
-              // hour12: true
-            };
-            formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp); // Output: Wed 6:14 PM
-          } else {
-            // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
-            formattedDate = new Intl.DateTimeFormat('en-US', {
-              // year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              // hour: 'numeric',
-              // minute: 'numeric',
-              // hour12: true
-            }).format(timestamp);
-          }
+      $.ajax({
+        url: '/getConversations/' + page_id + '/' + access_token + '/' + platform,
+        method: 'GET',
+        async: 'false', // Assuming the response is JSON
+        success: function(data) {
+          console.log(data)
+          for(var i=0; i<data.length; i++){
+            
+            const currentDate = new Date();
+            const timestamp = new Date(data[i].timestamp);
+            // Calculate the time difference in milliseconds between the two dates
+            const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp);
 
-          let lastMessage = data[i].last_message;
-          if(data[i].sender == page_id || data[i].sender == insta_id){
-            lastMessage = 'You: ' + lastMessage;
+            // Calculate the number of days between the two dates
+            const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+            // console.log(daysDifference)
+            if (daysDifference < 1){
+              const options = {
+                // weekday: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+              };
+              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp);
+            }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+              const options = {
+                weekday: 'short',
+                // hour: 'numeric',
+                // minute: 'numeric',
+                // hour12: true
+              };
+              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp); // Output: Wed 6:14 PM
+            } else {
+              // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
+              formattedDate = new Intl.DateTimeFormat('en-US', {
+                // year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                // hour: 'numeric',
+                // minute: 'numeric',
+                // hour12: true
+              }).format(timestamp);
+            }
+
+            let lastMessage = data[i].last_message;
+            if(data[i].sender == page_id || data[i].sender == insta_id){
+              lastMessage = 'You: ' + lastMessage;
+            }
+            $('#chats').append(`
+              <div class="conversation" id="chat${data[i].id}">
+                <li class="list-group-item bot-bubble rounded-bubble" onclick="getMessages('${data[i].id}')">${data[i].name}
+                <span class="timestamp">${formattedDate}</span>  
+                <div class="last_message" id="last_message${data[i].id}">${lastMessage}</div>
+              </div>
+            `)
+            // console.log(name)
+            // console.log(page_id, insta_id)
           }
-          $('#chats').append(`
-            <div class="conversation">
-              <li class="list-group-item bot-bubble rounded-bubble" id="chat${data[i].id}" onclick="getMessages('${data[i].id}')">${data[i].name}
-              <span class="timestamp">${formattedDate}</span>  
-              <div class="last_message">${lastMessage}</div>
-            </div>
-          `)
-          // console.log(name)
-          // console.log(page_id, insta_id)
-        }
+        },
       });
     }
 
@@ -434,7 +449,7 @@
       // current_recipient_id = id;
       $('.conversation').removeClass('selected');
       // Add 'selected' class to the clicked conversation
-      $('#chat' + id).parent().addClass('selected');
+      $('#chat' + id).addClass('selected');
       // console.log($(this))
       current_conversation_id = id;
       console.log(id);
@@ -442,229 +457,235 @@
       $('.chat-header').html('');
       $('#messagingBar').show()
       $('.chat-box').show();
-      $.get('/getMessages/' + id, function(data){
-        console.log(data)
-        current_user_id = data[0].id;
-        current_user_name = data[0].name;
-        $('#contact-name').html(current_user_name)
-        // console.log(data[2])
-        if(data[2]){
-          $('#contact-info').html(`
-            <div class="contact-details">
-              <div class="d-flex justify-content-between">
-                <p>Added Details</p>
-                <a data-toggle="modal" data-target="#editContactModal">Edit</a>
-              </div>
-              <p><b>Phone: </b>${data[2].phone}</p>
-              <p><b>Email: </b>${data[2].email}</p>
-              <p><b>Birthday: </b>${data[2].month !== '0' && data[2].day !== '0' ? data[2].month + ' ' + data[2].day : ''}</p>
-              <p><b>Address: </b>${data[2].address}</p>
-            </div>
-          `)
-          $('#addContactBtn').hide()
-          $("#editContactForm input[name='phone']").val(data[2].phone);
-          $("#editContactForm input[name='email']").val(data[2].email);
-          $("#editContactForm select[name='month']").val(data[2].month);
-          $("#editContactForm select[name='day']").val(data[2].day);
-          $("#editContactForm input[name='address']").val(data[2].address);
-          $("#editContactForm input[name='city']").val(data[2].city);
-          $("#editContactForm input[name='state']").val(data[2].state);
-          $("#editContactForm input[name='postalCode']").val(data[2].postalCode);
-        }
-        else{
-          $('#contact-info').html(`<p style="color: gray;">Add details about people, like contact information</p>`)
-          $('#addContactBtn').show()
-        }
-        $('#contact-card').show()
-        // console.log(current_user_id)
-        // console.log(current_user_name)
-        $('.chat-header').html(`
-          <div class="d-flex justify-content-between" style="margin-bottom: 10px">
-            <h5 id="chatName">${current_user_name}</h5>
-            <div>
-              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to spam" style="margin-right: 5px;"><i class="fa-solid fa-circle-exclamation"></i></button>
-              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Marks as follow up" style="margin-right: 5px;"><i class="fa-solid fa-star"></i></button>
-              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as unread" style="margin-right: 5px;"><i class="fa-solid fa-envelope"></i></button>
-              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as important" style="margin-right: 5px;"><i class="fa-solid fa-exclamation"></i></button>
-              <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to done" style="margin-right: 5px;"><i class="fa-solid fa-check"></i></button>
-              <button type="button" id="toggleRadioButtons" onclick="showRadioButtons()" class="btn btn-outline-secondary"><i class="fa-solid fa-share"></i></button>
-            </div>
-          </div>
-        `);
-        // $('.chat-header').html(`
-        //   <div class="d-flex justify-content-between">
-        //     <h5 id="chatName">${data[0]}</h5>
-        //   </div>
-        // `);
-        data = data[1]
-        for(var i=0; i<data.length; i++){
-          if(i <= data.length - 2 && i > 0){
-            const timestamp1 = new Date(data[i-1].timestamp);
-            const timestamp2 = new Date(data[i].timestamp);
 
-            // const timestamp1 = new Date(t1.getTime() + (5 * 60 * 60 * 1000));
-            // const timestamp2 = new Date(t2.getTime() + (5 * 60 * 60 * 1000));
-
-            const timeDifferenceInMilliseconds = timestamp1 - timestamp2;
-            const timeDifferenceInMinutes = timeDifferenceInMilliseconds / (1000 * 60);
-            // console.log(timestamp1)
-            // console.log(timestamp2)
-            let formattedDate = '';
-
-            if (timeDifferenceInMinutes > 3) {
-              const currentDate = new Date();
-              // Calculate the time difference in milliseconds between the two dates
-              const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp1);
-
-              // Calculate the number of days between the two dates
-              const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-
-              if(daysDifference < 1){
-                const options = {
-                  // weekday: 'short',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  hour12: true
-                };
-                formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1);
-              }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
-                const options = {
-                  weekday: 'short',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  hour12: true
-                };
-                formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1); // Output: Wed 6:14 PM
-              } else {
-                // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
-                formattedDate = new Intl.DateTimeFormat('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  hour12: true
-                }).format(timestamp1);
-              }
-
-              $('.chat-box').prepend(`
-                <div class="d-flex justify-content-center date">
-                  ${formattedDate}
+      $.ajax({
+        url: '/getMessages/' + id,
+        method: 'GET',
+        async: 'false', // Assuming the response is JSON
+        success: function(data) {
+          console.log(data)
+          current_user_id = data[0].id;
+          current_user_name = data[0].name;
+          $('#contact-name').html(current_user_name)
+          // console.log(data[2])
+          if(data[2]){
+            $('#contact-info').html(`
+              <div class="contact-details">
+                <div class="d-flex justify-content-between">
+                  <p>Added Details</p>
+                  <a data-toggle="modal" data-target="#editContactModal">Edit</a>
                 </div>
-              `);
-            }
+                <p><b>Phone: </b>${data[2].phone}</p>
+                <p><b>Email: </b>${data[2].email}</p>
+                <p><b>Birthday: </b>${data[2].month !== '0' && data[2].day !== '0' ? data[2].month + ' ' + data[2].day : ''}</p>
+                <p><b>Address: </b>${data[2].address}</p>
+              </div>
+            `)
+            $('#addContactBtn').hide()
+            $("#editContactForm input[name='phone']").val(data[2].phone);
+            $("#editContactForm input[name='email']").val(data[2].email);
+            $("#editContactForm select[name='month']").val(data[2].month);
+            $("#editContactForm select[name='day']").val(data[2].day);
+            $("#editContactForm input[name='address']").val(data[2].address);
+            $("#editContactForm input[name='city']").val(data[2].city);
+            $("#editContactForm input[name='state']").val(data[2].state);
+            $("#editContactForm input[name='postalCode']").val(data[2].postalCode);
           }
+          else{
+            $('#contact-info').html(`<p style="color: gray;">Add details about people, like contact information</p>`)
+            $('#addContactBtn').show()
+          }
+          $('#contact-card').show()
+          // console.log(current_user_id)
+          // console.log(current_user_name)
+          $('.chat-header').html(`
+            <div class="d-flex justify-content-between" style="margin-bottom: 10px">
+              <h5 id="chatName">${current_user_name}</h5>
+              <div>
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to spam" style="margin-right: 5px;"><i class="fa-solid fa-circle-exclamation"></i></button>
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Marks as follow up" style="margin-right: 5px;"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as unread" style="margin-right: 5px;"><i class="fa-solid fa-envelope"></i></button>
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as important" style="margin-right: 5px;"><i class="fa-solid fa-exclamation"></i></button>
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to done" style="margin-right: 5px;"><i class="fa-solid fa-check"></i></button>
+                <button type="button" id="toggleRadioButtons" onclick="showRadioButtons()" class="btn btn-outline-secondary"><i class="fa-solid fa-share"></i></button>
+              </div>
+            </div>
+          `);
+          // $('.chat-header').html(`
+          //   <div class="d-flex justify-content-between">
+          //     <h5 id="chatName">${data[0]}</h5>
+          //   </div>
+          // `);
+          data = data[1]
+          for(var i=0; i<data.length; i++){
+            if(i <= data.length - 2 && i > 0){
+              const timestamp1 = new Date(data[i-1].timestamp);
+              const timestamp2 = new Date(data[i].timestamp);
 
-          if(data[i].from != "114887508325720" && data[i].from != "17841405286734922"){
-            current_recipient_id = data[i].from;
-            if(data[i].attachments.length > 0){
-              for (var j = 0; j < data[i].attachments.length; j++) {
-                var attachment = data[i].attachments[j];
-                var attachmentElement;
-                // console.log(attachment.type)
-                if (attachment.type.includes("image")) {
-                  attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
-                } 
-                else if (attachment.type.includes("video")) {
-                  attachmentElement = `
-                    <div class="d-flex justify-content-between">
-                        <span>${attachment.name}</span>
-                        <a href="${attachment.url}" target="_blank" download>
-                            <i class="fas fa-download"></i>
-                        </a>
-                    </div>
-                  `;
-                }
-                else if (attachment.type.includes("application")) {
-                  attachmentElement = `
-                    <div class="d-flex justify-content-between">
-                        <span>${attachment.name}</span>
-                        <a href="${attachment.url}" target="_blank" download>
-                            <i class="fas fa-download"></i>
-                        </a>
-                    </div>
-                  `;
+              // const timestamp1 = new Date(t1.getTime() + (5 * 60 * 60 * 1000));
+              // const timestamp2 = new Date(t2.getTime() + (5 * 60 * 60 * 1000));
+
+              const timeDifferenceInMilliseconds = timestamp1 - timestamp2;
+              const timeDifferenceInMinutes = timeDifferenceInMilliseconds / (1000 * 60);
+              // console.log(timestamp1)
+              // console.log(timestamp2)
+              let formattedDate = '';
+
+              if (timeDifferenceInMinutes > 3) {
+                const currentDate = new Date();
+                // Calculate the time difference in milliseconds between the two dates
+                const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp1);
+
+                // Calculate the number of days between the two dates
+                const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+
+                if(daysDifference < 1){
+                  const options = {
+                    // weekday: 'short',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                  };
+                  formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1);
+                }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+                  const options = {
+                    weekday: 'short',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                  };
+                  formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1); // Output: Wed 6:14 PM
+                } else {
+                  // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
+                  formattedDate = new Intl.DateTimeFormat('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                  }).format(timestamp1);
                 }
 
                 $('.chat-box').prepend(`
-                    <div class='d-flex'>
+                  <div class="d-flex justify-content-center date">
+                    ${formattedDate}
+                  </div>
+                `);
+              }
+            }
+
+            if(data[i].from != page_id && data[i].from != insta_id){
+              current_recipient_id = data[i].from;
+              if(data[i].attachments.length > 0){
+                for (var j = 0; j < data[i].attachments.length; j++) {
+                  var attachment = data[i].attachments[j];
+                  var attachmentElement;
+                  // console.log(attachment.type)
+                  if (attachment.type.includes("image")) {
+                    attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+                  } 
+                  else if (attachment.type.includes("video")) {
+                    attachmentElement = `
+                      <div class="d-flex justify-content-between">
+                          <span>${attachment.name}</span>
+                          <a href="${attachment.url}" target="_blank" download>
+                              <i class="fas fa-download"></i>
+                          </a>
+                      </div>
+                    `;
+                  }
+                  else if (attachment.type.includes("application")) {
+                    attachmentElement = `
+                      <div class="d-flex justify-content-between">
+                          <span>${attachment.name}</span>
+                          <a href="${attachment.url}" target="_blank" download>
+                              <i class="fas fa-download"></i>
+                          </a>
+                      </div>
+                    `;
+                  }
+
+                  $('.chat-box').prepend(`
+                      <div class='d-flex'>
+                          <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
+                          <div class="chat-message">
+                              <div class="chat-bubble-response">
+                                  ${attachmentElement}
+                              </div>
+                          </div>
+                      </div>
+                  `);
+                }
+              }
+              else{
+                $('.chat-box').prepend(`
+                  <div class='d-flex'>
+                    <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
+                    <div class="chat-message">
+                        <div class="chat-bubble-response">${data[i].message}</div>
+                    </div>
+                  </div>
+                `);
+              }
+            }
+            else{
+              if(data[i].attachments.length > 0){
+                for (var j = 0; j < data[i].attachments.length; j++) {
+                  var attachment = data[i].attachments[j];
+                  var attachmentElement;
+                  // console.log(attachment.type)
+                  if (attachment.type.includes("image")) {
+                    attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+                  } 
+                  else if (attachment.type.includes("video")) {
+                    attachmentElement = `
+                      <div class="d-flex justify-content-between">
+                          <span>${attachment.name}</span>
+                          <a href="${attachment.url}" target="_blank" download>
+                              <i class="fas fa-download"></i>
+                          </a>
+                      </div>
+                    `;
+                  }
+                  else if (attachment.type.includes("application")) {
+                    attachmentElement = `
+                      <div class="d-flex justify-content-between">
+                          <span>${attachment.name}</span>
+                          <a href="${attachment.url}" target="_blank" download>
+                              <i class="fas fa-download"></i>
+                          </a>
+                      </div>
+                    `;
+                  }
+
+                  $('.chat-box').prepend(`
+                      <div class='d-flex flex-row-reverse'>
                         <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
                         <div class="chat-message">
-                            <div class="chat-bubble-response">
+                            <div class="chat-bubble-send">
                                 ${attachmentElement}
                             </div>
                         </div>
-                    </div>
-                `);
-              }
-            }
-            else{
-              $('.chat-box').prepend(`
-                <div class='d-flex'>
-                  <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
-                  <div class="chat-message">
-                      <div class="chat-bubble-response">${data[i].message}</div>
-                  </div>
-                </div>
-              `);
-            }
-          }
-          else{
-            if(data[i].attachments.length > 0){
-              for (var j = 0; j < data[i].attachments.length; j++) {
-                var attachment = data[i].attachments[j];
-                var attachmentElement;
-                // console.log(attachment.type)
-                if (attachment.type.includes("image")) {
-                  attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
-                } 
-                else if (attachment.type.includes("video")) {
-                  attachmentElement = `
-                    <div class="d-flex justify-content-between">
-                        <span>${attachment.name}</span>
-                        <a href="${attachment.url}" target="_blank" download>
-                            <i class="fas fa-download"></i>
-                        </a>
-                    </div>
-                  `;
-                }
-                else if (attachment.type.includes("application")) {
-                  attachmentElement = `
-                    <div class="d-flex justify-content-between">
-                        <span>${attachment.name}</span>
-                        <a href="${attachment.url}" target="_blank" download>
-                            <i class="fas fa-download"></i>
-                        </a>
-                    </div>
-                  `;
-                }
-
-                $('.chat-box').prepend(`
-                    <div class='d-flex flex-row-reverse'>
-                      <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
-                      <div class="chat-message">
-                          <div class="chat-bubble-send">
-                              ${attachmentElement}
-                          </div>
                       </div>
+                  `);
+                }
+              }
+              else{
+                $('.chat-box').prepend(`
+                  <div class='d-flex flex-row-reverse'>
+                    <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
+                    <div class="chat-message sent">
+                        <div class="chat-bubble-send">${data[i].message}</div>
                     </div>
+                  </div>
                 `);
               }
             }
-            else{
-              $('.chat-box').prepend(`
-                <div class='d-flex flex-row-reverse'>
-                  <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
-                  <div class="chat-message sent">
-                      <div class="chat-bubble-send">${data[i].message}</div>
-                  </div>
-                </div>
-              `);
-            }
           }
-        }
-        var element = document.querySelector(".chat-box");
-        element.scrollTop = element.scrollHeight;
+          var element = document.querySelector(".chat-box");
+          element.scrollTop = element.scrollHeight;
+        },
       });
     }
 
@@ -761,67 +782,333 @@
         reader.onload = function(event) {
             const imageUrl = event.target.result;
             const chatBubble = `
-              <div class='d-flex'>
+              <div class='d-flex flex-row-reverse'>
+                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data}')">
                 <div class="chat-message sent">
-                    <div class="chat-bubble-send" style="margin-left: 235px !important">
-                        <img width="420px" height="280px" src="${imageUrl}" alt="Sent Image">
+                    <div class="chat-bubble-send">
+                        <img src="${imageUrl}" alt="Sent Image">
                     </div>
                 </div>
-                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data}')">
               </div>
             `;
+
+            var conversationElement = $("#chat" + current_conversation_id);
+            var chatsContainer = $("#chats");
+
+            // Check if the conversation is already at the top
+            if (!conversationElement.is(chatsContainer.children().first())) {
+              // Add the class to trigger the animation
+              conversationElement.addClass("new-message");
+
+              // Move the conversation element to the top of the list
+              chatsContainer.prepend(conversationElement);
+
+              // Remove the class after the animation is complete
+              setTimeout(function() {
+                  conversationElement.removeClass("new-message");
+              }, 500); // 500ms should match the animation duration
+            }
+
             $('.chat-box').append(chatBubble);
+            $('#last_message' + current_conversation_id).text('You: Attachment');
+            var element = document.querySelector(".chat-box");
+            element.scrollTop = element.scrollHeight;
         };
         reader.readAsDataURL(file);
       })
     }
 
-    function sendMessage(){
-      var message = $('#message').val();
+    function sendMessage(event, message = null){
+      if (event.keyCode != 13 && event.which != 13 && event.button != 0){
+        return;
+      }
 
-      $.post('/sendMessage', {'message': message, 'recipient_id': current_recipient_id, 'platform': current_tab}, function(data) {
-        console.log(data);
-        getConversations(page_id , access_token, current_tab);
-        getMessages(current_conversation_id);
-        $('#message').val('');
-        var element = document.querySelector(".chat-box");
-        element.scrollTop = element.scrollHeight;
+      if(message == null)
+        var message = $('#message').val();
+
+      var conversationElement = $("#chat" + current_conversation_id);
+      var chatsContainer = $("#chats");
+
+      // Check if the conversation is already at the top
+      if (!conversationElement.is(chatsContainer.children().first())) {
+        // Add the class to trigger the animation
+        conversationElement.addClass("new-message");
+
+        // Move the conversation element to the top of the list
+        chatsContainer.prepend(conversationElement);
+
+        // Remove the class after the animation is complete
+        setTimeout(function() {
+            conversationElement.removeClass("new-message");
+        }, 500); // 500ms should match the animation duration
+      }
+
+      $('.chat-box').append(`
+        <div class='d-flex flex-row-reverse'>
+          <input type="radio" name="radio" onclick="">
+          <div class="chat-message sent">
+              <div class="chat-bubble-send">${message}</div>
+          </div>
+        </div>
+      `);
+      $('#message').val('');
+      $('#last_message' + current_conversation_id).text('You: ' + message);
+      var element = document.querySelector(".chat-box");
+      element.scrollTop = element.scrollHeight;
+
+      // $.post('/sendMessage', {'message': message, 'recipient_id': current_recipient_id, 'platform': current_tab}, function(data) {
+      //   console.log(data);
+        
+        
+      // });
+
+      $.ajax({
+        url: '/sendMessage',
+        method: 'POST',
+        data: {'message': message, 'recipient_id': current_recipient_id, 'platform': current_tab},
+        success: function(data) {
+          console.log(data)
+        },
+        error: function(){
+          console.log('Error')
+          // Get the last '.chat-box' div
+          var chatBoxDivs = document.querySelectorAll('.chat-box');
+          console.log(chatBoxDivs)
+          console.log(chatBoxDivs[0].children)
+          var lastChatBoxDiv = chatBoxDivs[0].children[chatBoxDivs[0].children.length - 1];
+          
+          // Create a new span element
+          var element = document.createElement('i');
+          // var spanElement = "<span style='color: red;'>Failed to send message. Click to send again.</span>";
+          // element.textContent = 'Failed to send message. Click to send again.';
+          element.classList.add('fa-solid')
+          element.classList.add('fa-rotate-right')
+          element.classList.add('message-sent-failed');
+
+          // Append the span element to the inner div
+          lastChatBoxDiv.style.alignItems = "center";
+          lastChatBoxDiv.setAttribute("data-toggle", "tooltip");
+          lastChatBoxDiv.setAttribute("data-placement", "top");
+          lastChatBoxDiv.setAttribute("title", "Failed to send message. Click to send again.");
+          lastChatBoxDiv.onclick = function() {
+            lastChatBoxDiv.remove();
+            sendMessage(event, message);
+          };
+          lastChatBoxDiv.appendChild(element);
+        }
       });
     }
 
-    var socket = io.connect('http://localhost:5000');
+    // var socket = io.connect('http://localhost:5000');
 
-    socket.on('connect', function() {
-        console.log('Connected to the server');
-    });
+    // socket.on('connect', function() {
+    //     console.log('Connected to the server');
+    // });
 
-    socket.on('message_received', function(data) {
-        // Handle the received message from the Flask route
-        console.log('Received conversation id:', data.conversation_id);
-        getConversations(page_id, access_token, current_tab);
-        if(data.conversation_id == current_conversation_id){
-          getMessages(current_conversation_id)
+    // socket.on('message_received', function(data) {
+        
+      // var conversationElement = $("#chat" + current_conversation_id);
+      // var chatsContainer = $("#chats");
+
+      // // Check if the conversation is already at the top
+      // if (!conversationElement.is(chatsContainer.children().first())) {
+      //     // Add the class to trigger the animation
+      //     conversationElement.addClass("new-message");
+
+      //     // Move the conversation element to the top of the list
+      //     chatsContainer.prepend(conversationElement);
+
+      //     // Remove the class after the animation is complete
+      //     setTimeout(function() {
+      //         conversationElement.removeClass("new-message");
+      //     }, 500); // 500ms should match the animation duration
+      // }
+        
+      // var received_message = data.data.messages[0];
+      // if(received_message.attachments.length > 0){
+      //   for (var j = 0; j < received_message.attachments.length; j++) {
+      //     var attachment = received_message.attachments[j];
+      //     var attachmentElement;
+      //     // console.log(attachment.type)
+      //     if (attachment.type.includes("image")) {
+      //       attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+      //     } 
+      //     else if (attachment.type.includes("video")) {
+      //       attachmentElement = `
+      //         <div class="d-flex justify-content-between">
+      //             <span>${attachment.name}</span>
+      //             <a href="${attachment.url}" target="_blank" download>
+      //                 <i class="fas fa-download"></i>
+      //             </a>
+      //         </div>
+      //       `;
+      //     }
+      //     else if (attachment.type.includes("application")) {
+      //       attachmentElement = `
+      //         <div class="d-flex justify-content-between">
+      //             <span>${attachment.name}</span>
+      //             <a href="${attachment.url}" target="_blank" download>
+      //                 <i class="fas fa-download"></i>
+      //             </a>
+      //         </div>
+      //       `;
+      //     }
+
+      //     $('.chat-box').append(`
+      //         <div class='d-flex'>
+      //             <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
+      //             <div class="chat-message">
+      //                 <div class="chat-bubble-response">
+      //                     ${attachmentElement}
+      //                 </div>
+      //             </div>
+      //         </div>
+      //     `);
+      //     var element = document.querySelector(".chat-box");
+      //     element.scrollTop = element.scrollHeight;
+      //   }
+      // }
+      // else{
+      //   $('.chat-box').append(`
+      //     <div class='d-flex'>
+      //       <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
+      //       <div class="chat-message">
+      //           <div class="chat-bubble-response">${received_message.message}</div>
+      //       </div>
+      //     </div>
+      //   `);
+      //   var element = document.querySelector(".chat-box");
+      //   element.scrollTop = element.scrollHeight;
+      // }
+
+    //     // if(current_conversation_id){
+    //     //   $('.chat-box').append(`
+    //     //     <div class='d-flex'>
+    //     //       <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data}')">
+    //     //       <div class="chat-message">
+    //     //           <div class="chat-bubble-response">${data.message}</div>
+    //     //       </div>
+    //     //     </div>
+    //     //   `);
+    //     //   var element = document.querySelector(".chat-box");
+    //     //   element.scrollTop = element.scrollHeight;
+    //     // }
+    //     // Call your JavaScript function here
+    //     // yourFunction();
+    // });
+
+    function checkForMessage() {
+      // Make an AJAX request to the server
+      $.ajax({
+        url: "/checkMessage",
+        type: "GET",
+        success: function (data) {
+          // Check the response from the server for a message
+          // if (response === "Your Message") {
+            // Do something with the message
+          // console.log("Received message from the server: " + JSON.stringify(data));
+
+          if(data != 'no message received'){
+            var conversationElement = $("#chat" + data.data.conversation_id);
+            var chatsContainer = $("#chats");
+
+            // Check if the conversation is already at the top
+            if (!conversationElement.is(chatsContainer.children().first())) {
+              // Add the class to trigger the animation
+              conversationElement.addClass("new-message");
+
+              // Move the conversation element to the top of the list
+              chatsContainer.prepend(conversationElement);
+
+              // Remove the class after the animation is complete
+              setTimeout(function() {
+                  conversationElement.removeClass("new-message");
+              }, 500); // 500ms should match the animation duration
+            }
+              
+            var received_message = data.data.messages[0];
+            if(received_message.attachments.length > 0){
+              for (var j = 0; j < received_message.attachments.length; j++) {
+                var attachment = received_message.attachments[j];
+                var attachmentElement;
+                // console.log(attachment.type)
+                if (attachment.type.includes("image")) {
+                  attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+                } 
+                else if (attachment.type.includes("video")) {
+                  attachmentElement = `
+                    <div class="d-flex justify-content-between">
+                        <span>${attachment.name}</span>
+                        <a href="${attachment.url}" target="_blank" download>
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                  `;
+                }
+                else if (attachment.type.includes("application")) {
+                  attachmentElement = `
+                    <div class="d-flex justify-content-between">
+                        <span>${attachment.name}</span>
+                        <a href="${attachment.url}" target="_blank" download>
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                  `;
+                }
+
+                if(current_conversation_id == data.data.conversation_id){
+                  $('.chat-box').append(`
+                    <div class='d-flex'>
+                        <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
+                        <div class="chat-message">
+                            <div class="chat-bubble-response">
+                                ${attachmentElement}
+                            </div>
+                        </div>
+                    </div>
+                  `);
+                  var element = document.querySelector(".chat-box");
+                  element.scrollTop = element.scrollHeight;
+                }
+                
+                $('#last_message' + data.data.conversation_id).text('Attachment')
+                
+              }
+            }
+            else{
+              if(current_conversation_id == data.data.conversation_id){
+                $('.chat-box').append(`
+                  <div class='d-flex'>
+                    <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
+                    <div class="chat-message">
+                        <div class="chat-bubble-response">${received_message.message}</div>
+                    </div>
+                  </div>
+                `);
+                var element = document.querySelector(".chat-box");
+                element.scrollTop = element.scrollHeight;
+              }
+              
+              $('#last_message' + data.data.conversation_id).text(received_message.message)
+              
+            }
+          }
+        },
+        error: function (xhr, status, error) {
+          // Handle any errors here
+          console.error("Error: " + error);
         }
-        // if(current_conversation_id){
-        //   $('.chat-box').append(`
-        //     <div class='d-flex'>
-        //       <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data}')">
-        //       <div class="chat-message">
-        //           <div class="chat-bubble-response">${data.message}</div>
-        //       </div>
-        //     </div>
-        //   `);
-        //   var element = document.querySelector(".chat-box");
-        //   element.scrollTop = element.scrollHeight;
-        // }
-        // Call your JavaScript function here
-        // yourFunction();
-    });
+      });
+    }
+
+    // Set up a timer to check for messages every 3 seconds
+    setInterval(checkForMessage, 3000);
 
     var current_tab = 'all';
 
     function switchTab(page_id, access_token, platform){
       current_tab = platform
+      console.log(current_tab)
       getConversations(page_id, access_token, current_tab)
       $('.tab-pills').removeClass('active')
       $('#' + platform).addClass('active')

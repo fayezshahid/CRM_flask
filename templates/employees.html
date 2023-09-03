@@ -69,21 +69,43 @@
 
 {% block scripts %}
     <script>
-
+        var page_ids, page_names;
         $(document).ready(function() {
-            loadEmplooyees()
-            $('.js-example-basic-multiple').select2();
+            
+            var allOptions = $("#pages").find("option");
+    
+            page_ids = allOptions.map(function() {
+                return parseInt($(this).val());
+            }).get();
+            
+            page_names = allOptions.map(function() {
+                return $(this).text();
+            }).get();
+            
+            loadEmplooyees();
+            // $('.js-example-basic-multiple').select2();
         });
 
         function loadEmplooyees(){
             $.ajax({
                 url: '/getEmployees',
                 type: 'GET',
+                async: false,
                 success: function(data) {
                     $('tbody').html('')
                     console.log(data)
                     for(var i=0; i<data.length; i++)
                     {
+                        var element = '';
+                        // console.log(page_ids)
+
+                        var pageIds = data[i].pages.map(function(page) {
+                            return page.page_id;
+                        });
+                        
+                        for(var j=0; j<page_ids.length; j++){
+                            element += `<option value="${page_ids[j]}" ${pageIds.includes(page_ids[j]) ? 'selected' : ''}>${page_names[j]}</option>`
+                        }
                         $('tbody').append(`
                             <tr>
                                 <td>${data[i].id}</td>
@@ -111,11 +133,17 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="role">Role:</label>
-                                                                <select class="form-control" id="role" name="role">
+                                                                <select class="form-control" id="role${data[i].id}" name="role">
                                                                     <option ${data[i].role_id == 1 ? 'selected' : ''} value="1">Admin</option>
                                                                     <option ${data[i].role_id == 2 ? 'selected' : ''} value="2">Sales</option>
                                                                     <option ${data[i].role_id == 3 ? 'selected' : ''} value="3">Operation</option>
                                                                     <option ${data[i].role_id == 4 ? 'selected' : ''} value="4">Developer/Designer</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="role">Pages:</label>
+                                                                <select style="width: 100% !important;" class="form-control js-example-basic-multiple" id="pages${data[i].id}" name="pages[]" multiple="multiple">
+                                                                    ${element}
                                                                 </select>
                                                             </div>
                                                         </form>
@@ -131,6 +159,7 @@
                             </tr>
                         `)
                     }
+                    $('.js-example-basic-multiple').select2();
                 },
             });
         }

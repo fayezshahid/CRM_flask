@@ -1,0 +1,4 @@
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'mntgedkh_mntgedkh'
+app.config['MYSQL_PASSWORD'] = '0[-xS19@64#&*#hJyi"F+'
+app.config['MYSQL_DB'] = 'mntgedkh_crm'

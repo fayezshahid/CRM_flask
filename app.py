@@ -161,6 +161,9 @@ def getConversationDict(page_id, page_access_token, platform = None):
         return sorted_conversations
 
 sorted_conversations = {}
+messenger_conversations = {}
+instagram_conversations = {}
+message_received = {}
 
 @app.route('/')
 def index():
@@ -228,20 +231,27 @@ def getIds():
 @app.route('/getConversations/<page_id>/<page_access_token>/<platform>', methods=['GET'])
 def getConversations(page_id, page_access_token, platform):
     # print(session['role'])
-    global sorted_conversations
+    global sorted_conversations, messenger_conversations, instagram_conversations
     global PAGE_ID, PAGE_ACCESS_TOKEN
     PAGE_ID = page_id
     PAGE_ACCESS_TOKEN = page_access_token
     if session['role'] == 1:
-        # if platform == 'fb':
-        #     return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in messenger_conversations.items()]
-        # elif platform == 'insta':
-        #     return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in instagram_conversations.items()]
-        # elif platform == 'all':
-        #     return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in sorted_conversations.items()]
+        if platform == 'fb':
+            messenger_conversations = getConversationDict(page_id, page_access_token, platform)
+            return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in messenger_conversations.items()]
+        elif platform == 'insta':
+            instagram_conversations = getConversationDict(page_id, page_access_token, platform)
+            return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in instagram_conversations.items()]
+        elif platform == 'all':
+            sorted_conversations = getConversationDict(page_id, page_access_token)
+            return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in sorted_conversations.items()]
+    elif session['role'] == 2:
+        # print(page_access_token)
+        # print(PAGE_ACCESS_TOKEN)
         sorted_conversations = getConversationDict(page_id, page_access_token)
+        # print(conversations)
         return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in sorted_conversations.items()]
-    if session['role'] > 2:
+    elif session['role'] > 2:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT conversation_id FROM chat_shares WHERE receiver_id = %s', (session['id'],))
         data = cursor.fetchall()
@@ -251,13 +261,7 @@ def getConversations(page_id, page_access_token, platform):
             convs.append({'id': x['conversation_id'], 'name': sorted_conversations[x['conversation_id']]['name'], 'last_message': sorted_conversations[x['conversation_id']]['messages'][0]['message'], 'sender': sorted_conversations[x['conversation_id']]['messages'][0]['from'], 'timestamp': sorted_conversations[x['conversation_id']]['messages'][0]['timestamp']})
         # return [{'id': conv_id, 'name': details['name']} for conv_id,details in conversations.items()]
         return convs
-    else:
-        # print(page_access_token)
-        # print(PAGE_ACCESS_TOKEN)
-        sorted_conversations = getConversationDict(page_id, page_access_token)
-        # print(conversations)
-        return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp']} for conv_id,details in sorted_conversations.items()]
-
+    
 @app.route('/getMessages/<conversation_id>', methods=['GET'])
 def getMessages(conversation_id):
     # conversations = sorted_conversations
@@ -279,14 +283,27 @@ def getMessages(conversation_id):
     else:
         # print( conversations[conversation_id])
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # print(sorted_conversations)
         cursor.execute('SELECT * FROM contacts WHERE id = %s', (sorted_conversations[conversation_id]['id'],))
         data = cursor.fetchone()
         return [{"id": sorted_conversations[conversation_id]['id'], "name": sorted_conversations[conversation_id]['name']}, sorted_conversations[conversation_id]['messages'], data]
+
+@app.route("/checkMessage", methods=["GET", "POST"])
+def check_message():
+    global message_received
+    if message_received:
+        tmp = message_received
+        message_received = {}
+        print('fayez')
+        print(tmp)
+        return jsonify(tmp)
+    return 'no message received'
 
 @app.route("/receiveMessage", methods=["GET", "POST"])
 def receive_message():
     # print(request.get_json())
     # return 'success',200
+
     # hub_challenge = request.args.get("hub.challenge")
     # return hub_challenge, 200
 
@@ -298,10 +315,10 @@ def receive_message():
     # _from = post_data['entry'][0]['messaging'][0]['message']['from']['id']
     receiver_id = post_data['entry'][0]['id']
     # print(receiver_id)
-    if receiver_id == PAGE_ID:
+    if post_data['object'] == 'page':
         p = 'messenger'
         platform = 'fb'
-    else:
+    elif post_data['object'] == 'instagram':
         p = 'instagram'
         platform = 'insta'
     # sender_name = post_data['entry'][0]['messaging'][0]['sender']['name']
@@ -333,21 +350,24 @@ def receive_message():
     #     index += 1
 
     response = requests.get(f'{FB_GRAPH_BASE_URL}/{message_id}/attachments', params={'access_token': PAGE_ACCESS_TOKEN})
+    
+    try:
+        for x in response.json()['data']:
+            if 'image' in x['mime_type']:
+                attachment_type = 'image'
+            elif 'video' in x['mime_type']:
+                attachment_type = 'video'
+            else:
+                attachment_type = 'file'
 
-    for x in response.json()['data']:
-        if 'image' in x['mime_type']:
-            attachment_type = 'image'
-        elif 'video' in x['mime_type']:
-            attachment_type = 'video'
-        else:
-            attachment_type = 'file'
+            if attachment_type == 'image' or attachment_type == 'video':
+                url = x[f'{attachment_type}_data']['preview_url']
+            else:
+                url = x['file_url']
 
-        if attachment_type == 'image' or attachment_type == 'video':
-            url = x[f'{attachment_type}_data']['preview_url']
-        else:
-            url = x['file_url']
-
-        attachment.append({'type': x['mime_type'], 'name': x['name'], 'size': x['size'], 'url': url})
+            attachment.append({'type': x['mime_type'], 'name': x['name'], 'size': x['size'], 'url': url})
+    except:
+        attachment = []
 
     # attachment = post_data['entry'][0]['messaging'][0]['message']['attachments'][0] if 'attachments' in post_data['entry'][0]['messaging'][0]['message'] else []
     # print(sender_id, receiver_id, message, attachment)
@@ -363,7 +383,7 @@ def receive_message():
         f"{FB_GRAPH_BASE_URL}/{PAGE_ID}/conversations",
         params=conversations_params
     )
-    # print(response.json())
+    print(response.json())
     conversation_id = response.json()['data'][0]['id']
     # print(conversation_id)
     if p == 'messenger':
@@ -401,9 +421,11 @@ def receive_message():
     # print(conversations)
 
     sort_conversations(conversation_id, platform)
-
-    socketio.emit('message_received', {'conversation_id': conversation_id})
     
+    # socketio.emit('message_received', {'data': {'id': sender_id, 'name': sender_name, 'messages': [{'message_id': message_id, 'message': message, 'timestamp': timestamp, 'from': sender_id, 'to': receiver_id, 'attachments': attachment}]}})
+    global message_received
+    message_received = {'data': {'conversation_id': conversation_id, 'id': sender_id, 'name': sender_name, 'messages': [{'message_id': message_id, 'message': message, 'timestamp': timestamp, 'from': sender_id, 'to': receiver_id, 'attachments': attachment}]}}
+
     return timestamp
 
 @app.route("/sendMessage", methods=["POST"])
@@ -411,7 +433,7 @@ def send_message():
     message = request.form['message']
     recipient_id = request.form['recipient_id']
     platform = request.form['platform']
-
+    
     message_params = {
         'recipient': json.dumps({'id': recipient_id}),
         'message': json.dumps({
@@ -620,8 +642,47 @@ def get_employees():
     cursor.execute('SELECT *, name as role FROM employees,roles WHERE employees.role_id = roles.id')
     # cursor.execute('SELECT * FROM employees')
     employees = cursor.fetchall()
-    # print(employees)
-    return jsonify(employees)
+    
+    cursor.execute('SELECT ep.employee_id, ep.page_id, p.name FROM employee_pages ep, pages p WHERE ep.page_id = p.id')
+    pages = cursor.fetchall()
+    
+    # Create a dictionary to store employees and their pages
+    employee_pages = []
+
+    # Populate the dictionary with employee information
+    for employee in employees:
+        employee_pages.append({
+            'id': employee['id'],
+            'username': employee['username'],
+            'password': employee['password'],
+            'role_id': employee['role_id'],
+            'role': employee['role'],
+            'pages': []
+        })
+
+
+    # Associate pages with employees
+    # for page in pages:
+    #     employee_id = page['employee_id']
+    #     page_info = {
+    #         'page_id': page['page_id'],
+    #         'name': page['name']
+    #     }
+    #     employee_pages[employee_id]['pages'].append(page_info)
+
+    for page in pages:
+        employee_id = page['employee_id']
+        page_info = {
+            'page_id': page['page_id'],
+            'name': page['name']
+        }
+        for employee in employee_pages:
+            if employee['id'] == employee_id:
+                employee['pages'].append(page_info)
+                break
+
+    print(tuple(employee_pages))
+    return jsonify(tuple(employee_pages))
     
 @app.route("/addEmployee", methods=["POST"])
 def add_employee():
