@@ -1,7 +1,9 @@
 {% extends "index.html" %}
 {% block content %}
+  <audio id="notificationSound" src="facebook_messenger.mp3"></audio>
   <input type="hidden" id="isActiveElement" value="chat">
-  <div class="row" style="margin-top: 10px;">
+  <input type="hidden" id="currentPage" value="{{ page_id }},{{ access_token }},{{ page_name }}">
+  <!-- <div class="row" style="margin-top: 10px;">
     <div class="col-2">
       <select onchange="changePage(this.value)" class="form-control" name="" id="changePage">
         {% for page in pages %}
@@ -9,7 +11,7 @@
         {% endfor %}
       </select>
     </div>
-  </div>
+  </div> -->
   <div style="margin-right: 0; margin-top: 10px; margin-left: 0; padding: 0 20px;">
     {% if role == 1 %}
     <div class="row">
@@ -95,7 +97,7 @@
                 </div> -->
               </div>
               <form id="messagingBar" style="display: none;" onsubmit="return false;">
-                <div class="message-box d-flex">
+                <div class="message-box d-flex" >
                   <input type="text" id="message" placeholder="Type your message..." onkeypress="sendMessage(event)">
                   <!-- <button type="button" class="btn btn-outline-warning" style="margin-left: 5px;" onclick="triggerFileInput()">Attachment</button> -->
                   <div class="message-icons">
@@ -103,7 +105,11 @@
                     <input type="file" id="attachmentInput" style="display: none;" onchange="attach(event)">
                     <!-- <button type="button" class="btn btn-outline-primary" style="margin-left: 5px;" onclick="sendMessage()">Send</button> -->
                     <i class="fa-regular fa-message"></i>
-                    <i class="fa-regular fa-face-smile"></i>
+                    <!-- <p class="emoji-picker-container">
+                      <input data-emojiable="true" data-emoji-input="unicode" maxlength="10" />
+                    </p> -->
+                    <!-- <i id="emoji" class="fa-regular fa-smile"></i> -->
+                    <!-- <div id="emoji"></div> -->
                   </div>
                 </div>
               </form>
@@ -238,6 +244,16 @@
                     <input type="text" class="form-control" name="postalCode" id="">
                   </div>
                 </div>
+                <div class="input-group justify-content-between">
+                  <div class="form-group">
+                    <label for="">Project Name</label>
+                    <input type="text" class="form-control" name="projectName">
+                  </div>
+                  <div class="form-group">
+                    <label for="">Product</label>
+                    <input type="text" class="form-control" name="product">
+                  </div>
+                </div>
                 <button type="button" onclick="addContact()" style="float: right ;" class="btn btn-primary">Save</button>
               </form>
             </div>
@@ -333,6 +349,16 @@
                     <input type="text" class="form-control" name="postalCode" id="">
                   </div>
                 </div>
+                <div class="input-group justify-content-between">
+                  <div class="form-group">
+                    <label for="">Project Name</label>
+                    <input type="text" class="form-control" name="projectName">
+                  </div>
+                  <div class="form-group">
+                    <label for="">Product</label>
+                    <input type="text" class="form-control" name="product">
+                  </div>
+                </div>
                 <button type="button" onclick="editContact()" style="float: right ;" class="btn btn-primary">Save</button>
               </form>
             </div>
@@ -343,13 +369,36 @@
 
 {% block scripts %}
 <script>
-    var page_id, insta_id, access_token;
+    var page_id, insta_id, access_token, page_name;
 
     $(document).ready(function(){
-      arr = $('#changePage').val().split(',')
+      // $('#')onkeypress="sendMessage(event)"
+      $('#message').emojioneArea({
+        events: {
+            keyup: function (editor, event) {
+                // Check if the pressed key is the Enter key (key code 13)
+                // if (event.which === 13) {
+                sendMessage(event, $(this)[0].getText());
+                // console.log(editor)
+                // }
+            }
+        }
+      })
+      // $('.emojionearea-editor').click(function(event){
+      //   sendMessage(event)
+      // })
+
+      // var el = $("#message").emojioneArea();
+      // // console.log(el[0].emojioneArea.getText())
+      // el[0].emojioneArea.on("click", function(btn, event) {
+      //   console.log(btn.html());
+      // });
+      
+      $('#pages').show()
+      arr = $('#currentPage').val().split(',')
       page_id = arr[0]
       access_token = arr[1]
-      // console.log(page_id, access_token)
+      page_name = arr[2]
       switchTab(page_id, access_token, 'all')
       getIds()
       $('[data-toggle="tooltip"]').tooltip();
@@ -473,7 +522,7 @@
               <div class="contact-details">
                 <div class="d-flex justify-content-between">
                   <p>Added Details</p>
-                  <a data-toggle="modal" data-target="#editContactModal">Edit</a>
+                  <a onclick="toggleEditContactModal()">Edit</a>
                 </div>
                 <p><b>Phone: </b>${data[2].phone}</p>
                 <p><b>Email: </b>${data[2].email}</p>
@@ -482,14 +531,14 @@
               </div>
             `)
             $('#addContactBtn').hide()
-            $("#editContactForm input[name='phone']").val(data[2].phone);
-            $("#editContactForm input[name='email']").val(data[2].email);
-            $("#editContactForm select[name='month']").val(data[2].month);
-            $("#editContactForm select[name='day']").val(data[2].day);
-            $("#editContactForm input[name='address']").val(data[2].address);
-            $("#editContactForm input[name='city']").val(data[2].city);
-            $("#editContactForm input[name='state']").val(data[2].state);
-            $("#editContactForm input[name='postalCode']").val(data[2].postalCode);
+            // $("#editContactForm input[name='phone']").val(data[2].phone);
+            // $("#editContactForm input[name='email']").val(data[2].email);
+            // $("#editContactForm select[name='month']").val(data[2].month);
+            // $("#editContactForm select[name='day']").val(data[2].day);
+            // $("#editContactForm input[name='address']").val(data[2].address);
+            // $("#editContactForm input[name='city']").val(data[2].city);
+            // $("#editContactForm input[name='state']").val(data[2].state);
+            // $("#editContactForm input[name='postalCode']").val(data[2].postalCode);
           }
           else{
             $('#contact-info').html(`<p style="color: gray;">Add details about people, like contact information</p>`)
@@ -779,11 +828,13 @@
       .done(function(data) {
         console.log(data)
         const reader = new FileReader();
+        var chatBubble;
         reader.onload = function(event) {
+          if(data.type.includes("image")){
             const imageUrl = event.target.result;
-            const chatBubble = `
+            chatBubble = `
               <div class='d-flex flex-row-reverse'>
-                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data}')">
+                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '123')">
                 <div class="chat-message sent">
                     <div class="chat-bubble-send">
                         <img src="${imageUrl}" alt="Sent Image">
@@ -791,28 +842,63 @@
                 </div>
               </div>
             `;
+          }
+          else if(data.type.includes("video")){
+            chatBubble = `
+              <div class='d-flex flex-row-reverse'>
+                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '123')">
+                <div class="chat-message sent">
+                    <div class="chat-bubble-send">
+                        <div class="d-flex justify-content-between">
+                            <span>${data.name}</span>
+                            <a href="${data.url}" target="_blank" download>
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            `;
+          }
+          else if(data.type.includes("application")){
+            chatBubble = `
+              <div class='d-flex flex-row-reverse'>
+                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '123')">
+                <div class="chat-message sent">
+                    <div class="chat-bubble-send">
+                        <div class="d-flex justify-content-between">
+                            <span>${data.name}</span>
+                            <a href="${data.url}" target="_blank" download>
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            `;
+          }
 
-            var conversationElement = $("#chat" + current_conversation_id);
-            var chatsContainer = $("#chats");
+          var conversationElement = $("#chat" + current_conversation_id);
+          var chatsContainer = $("#chats");
 
-            // Check if the conversation is already at the top
-            if (!conversationElement.is(chatsContainer.children().first())) {
-              // Add the class to trigger the animation
-              conversationElement.addClass("new-message");
+          // Check if the conversation is already at the top
+          if (!conversationElement.is(chatsContainer.children().first())) {
+            // Add the class to trigger the animation
+            conversationElement.addClass("new-message");
 
-              // Move the conversation element to the top of the list
-              chatsContainer.prepend(conversationElement);
+            // Move the conversation element to the top of the list
+            chatsContainer.prepend(conversationElement);
 
-              // Remove the class after the animation is complete
-              setTimeout(function() {
-                  conversationElement.removeClass("new-message");
-              }, 500); // 500ms should match the animation duration
-            }
+            // Remove the class after the animation is complete
+            setTimeout(function() {
+                conversationElement.removeClass("new-message");
+            }, 500); // 500ms should match the animation duration
+          }
 
-            $('.chat-box').append(chatBubble);
-            $('#last_message' + current_conversation_id).text('You: Attachment');
-            var element = document.querySelector(".chat-box");
-            element.scrollTop = element.scrollHeight;
+          $('.chat-box').append(chatBubble);
+          $('#last_message' + current_conversation_id).text('You: Attachment');
+          var element = document.querySelector(".chat-box");
+          element.scrollTop = element.scrollHeight;
         };
         reader.readAsDataURL(file);
       })
@@ -823,9 +909,11 @@
         return;
       }
 
-      if(message == null)
-        var message = $('#message').val();
+      // if(message == null)
+      //   var message = $('#message').val();
 
+      $("#message")[0].emojioneArea.setText('');
+      
       var conversationElement = $("#chat" + current_conversation_id);
       var chatsContainer = $("#chats");
 
@@ -851,7 +939,7 @@
           </div>
         </div>
       `);
-      $('#message').val('');
+      // $('#message').val('');
       $('#last_message' + current_conversation_id).text('You: ' + message);
       var element = document.querySelector(".chat-box");
       element.scrollTop = element.scrollHeight;
@@ -1026,6 +1114,9 @@
               }, 500); // 500ms should match the animation duration
             }
               
+            const notificationSound = document.getElementById("notificationSound");
+            notificationSound.play();
+
             var received_message = data.data.messages[0];
             if(received_message.attachments.length > 0){
               for (var j = 0; j < received_message.attachments.length; j++) {
@@ -1125,6 +1216,8 @@
       var city = $("#contactForm input[name='city']").val();
       var state = $("#contactForm input[name='state']").val();
       var postalCode = $("#contactForm input[name='postalCode']").val();
+      var projectName = $("#contactForm input[name='projectName']").val();
+      var product = $("#contactForm input[name='product']").val();
       // console.log(id)
       // Create an object with the collected data
       var formData = {
@@ -1137,9 +1230,12 @@
         address: address,
         city: city,
         state: state,
-        postalCode: postalCode
+        postalCode: postalCode,
+        pageId: page_id,
+        projectName: projectName,
+        product: product
       };
-      console.log(formData)
+      // console.log(formData)
       // Send data to the server using AJAX
       $.ajax({
           type: "POST",
@@ -1156,7 +1252,7 @@
               <div class="contact-details">
                 <div class="d-flex justify-content-between">
                   <p>Added Details</p>
-                  <a data-toggle="modal" data-target="#editContactModal">Edit</a>
+                  <a onclick="toggleEditContactModal()">Edit</a>
                 </div>
                 <p><b>Phone: </b>${phone}</p>
                 <p><b>Email: </b>${email}</p>
@@ -1173,6 +1269,22 @@
       });
     }
 
+    function toggleEditContactModal(){
+      $.get('/getContact/' + current_user_id, function(data){
+        $("#editContactForm input[name='phone']").val(data.phone);
+        $("#editContactForm input[name='email']").val(data.email);
+        $("#editContactForm select[name='month']").val(data.month);
+        $("#editContactForm select[name='day']").val(data.day);
+        $("#editContactForm input[name='address']").val(data.address);
+        $("#editContactForm input[name='city']").val(data.city);
+        $("#editContactForm input[name='state']").val(data.state);
+        $("#editContactForm input[name='postalCode']").val(data.postal_code);
+        $("#editContactForm input[name='projectName']").val(data.project_name);
+        $("#editContactForm input[name='product']").val(data.product);
+        $('#editContactModal').modal('show');
+      }) 
+    }
+
     function editContact(){
       var id = current_user_id;
       var name = current_user_name;
@@ -1184,6 +1296,8 @@
       var city = $("#editContactForm input[name='city']").val();
       var state = $("#editContactForm input[name='state']").val();
       var postalCode = $("#editContactForm input[name='postalCode']").val();
+      var projectName = $("#editContactForm input[name='projectName']").val();
+      var product = $("#editContactForm input[name='product']").val();
       // console.log(id)
       // Create an object with the collected data
       var formData = {
@@ -1196,7 +1310,10 @@
         address: address,
         city: city,
         state: state,
-        postalCode: postalCode
+        postalCode: postalCode,
+        pageId: page_id,
+        projectName: projectName,
+        product: product
       };
       // console.log(formData)
       // Send data to the server using AJAX
@@ -1215,7 +1332,7 @@
               <div class="contact-details">
                 <div class="d-flex justify-content-between">
                   <p>Added Details</p>
-                  <a data-toggle="modal" data-target="#editContactModal">Edit</a>
+                  <a onclick="toggleEditContactModal()">Edit</a>
                 </div>
                 <p><b>Phone: </b>${phone}</p>
                 <p><b>Email: </b>${email}</p>
@@ -1239,6 +1356,7 @@
       // console.log(selectedArray)
       page_id = selectedArray[0];
       access_token = selectedArray[1];
+      page_name = $('#changePage option:selected').text();
       switchTab(page_id, access_token, current_tab)
     }
 

@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.min.css" integrity="sha512-vEia6TQGr3FqC6h55/NdU3QSM5XR6HSl5fW71QTKrgeER98LIMGwymBVM867C1XHIkYD9nMTfWK2A0xcodKHNA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta charset="UTF-8">
 </head>
 <body>
   <!-- Horizontal Navbar -->
@@ -56,9 +58,21 @@
               </div>
               {% endif %}
               <div class="icons" id="chat">
-                <a style="color: unset" href="{{ url_for('chat') }}">
+                <a style="color: unset" onclick="toggleChat()">
                   <i class="fa-solid fa-comment"></i>
                   <span class="icon-text">Chat</span>
+                </a>
+              </div>
+              <div id="pages" style="display: none;">
+                <!-- Additional options go here -->
+                  <!-- <a class="pages" id="114887508325720">Option 1</a> -->
+                  <!-- <a href="#">Option 2</a> -->
+                  <!-- <a href="#">Option 3</a> -->
+              </div>
+              <div class="icons" id="sheet">
+                <a style="color: unset" href="{{ url_for('sheets') }}">
+                  <i class="fa-solid fa-table"></i>
+                  <span class="icon-text">Sheets</span>
                 </a>
               </div>
             </li>
@@ -83,11 +97,35 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.min.js" integrity="sha512-hkvXFLlESjeYENO4CNi69z3A1puvONQV5Uh+G4TUDayZxSLyic5Kba9hhuiNLbHqdnKNMk2PxXKm0v7KDnWkYA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
     // $(document).ready(function() {
       $('.icons').removeClass('active');
       $('#' + $('#isActiveElement').val()).addClass('active');
     // });
+
+    let el;
+    $(document).ready(function() {
+      $.get('/getPages', function(data){
+        data.forEach(function(page){
+          $('#pages').css('margin-top', '5px')
+          el = $('<a class="pages" href="/chat/' + page.id + '" id="' + page.id + '">' + page.name + '</a>')
+          $('#pages').append(el);
+          try {
+            if (page_id == page.id) {
+              el.addClass('active')
+            }
+          } catch (error) {
+            
+          }
+        });
+      });
+    });
+
+    function toggleChat() {
+      $('#pages').toggle();
+    }
+
   </script>
   {% block scripts %}
   {% endblock %}

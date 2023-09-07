@@ -10,6 +10,8 @@ import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from datetime import datetime, timedelta
+import gspread
+import re
 
 FB_GRAPH_BASE_URL = 'https://graph.facebook.com/v17.0'
 PAGE_ID = '114887508325720'
@@ -30,6 +32,9 @@ app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'crm'
 
 mysql = MySQL(app)
+
+gc = gspread.service_account(filename='credentials.json')
+sh = gc.open('Sales')
 
 def process_conversations(data):
     conversations = {}
@@ -209,20 +214,41 @@ def logout():
     session.pop('name', None)
     return redirect(url_for('login'))
 
-@app.route('/chat', methods=['GET'])
-def chat():
+@app.route('/chat/<page_id>', methods=['GET'])
+def chat(page_id):
     if not session or not session['loggedin']:
         return redirect(url_for('login'))
     else:
         # pages = []
         # if session['role'] == 2:
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM pages WHERE id IN (SELECT page_id FROM employee_pages WHERE employee_id = %s)', (session['id'],))
-        pages = cursor.fetchall()
-        print(pages)
+        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # cursor.execute('SELECT * FROM pages WHERE id IN (SELECT page_id FROM employee_pages WHERE employee_id = %s)', (session['id'],))
+        # pages = cursor.fetchall()
+        # print(pages)
         # for x in data:
         #     pages.append(x['page_id'])
-        return render_template('chat.html', username=session['username'], role=session['role'], pages=pages)
+
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT name, access_token FROM pages WHERE id = %s', (page_id,))
+        data = cursor.fetchone()
+        access_token = data['access_token']
+        page_name = data['name']
+    
+        return render_template('chat.html', username=session['username'], role=session['role'], page_id=page_id, page_name=page_name, access_token=access_token)
+    
+@app.route('/privacy', methods=['GET'])
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/getPages', methods=['GET'])
+def getPages():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM pages WHERE id IN (SELECT page_id FROM employee_pages WHERE employee_id = %s)', (session['id'],))
+    data = cursor.fetchall()
+    # for row in data:
+    #     row['url'] = r"{{ url_for('chat', page_id=' + row['id'] + ') }}"
+    # print(data)
+    return jsonify(data)
     
 @app.route('/getIds', methods=['GET'])
 def getIds():
@@ -622,7 +648,7 @@ def send_attachment():
 
     sort_conversations(conversation_id, platform)
 
-    return timestamp
+    return {'type': f'{file_mime_type}', 'name': name, 'size': size, 'url': url}
 
     # return response.json()['attachment_id']
 
@@ -731,12 +757,72 @@ def edit_employee(employee_id):
         mysql.connection.commit()
         return 'success'
     
+@app.route("/sheets", methods=["GET"])
+def sheets():
+    if not session or not session['loggedin']:
+        return redirect(url_for('login'))
+    # if session['role'] == 1:
+    # print(sh.worksheets()[0])
+    sheets = []
+    for sheet in sh.worksheets():
+        sheets.append({'id': sheet.id, 'title': sheet.title})
+    # text = str(sh.worksheets()[0])
+    # id = sh.worksheets()[0].id
+    # name = re.search(r"'(.*?)'", text).group(1)
+    # for t in tmp:
+    #     print(t)
+
+    return render_template('sheets.html', username=session['username'], role=session['role'], sheets=sheets)
+
+@app.route("/getSheets/<sheet_name>", methods=["GET"])
+def getSheets(sheet_name):
+    wks = sh.worksheet(sheet_name)
+    data = wks.get_all_records()
+    return data
+    # return render_template('sheets.html')
+
+@app.route("/addSale", methods=["POST"])
+def add_sale():
+    if not session or not session['loggedin']:
+        return redirect(url_for('login'))
+    # if session['role'] == 1:
+    # print(request.form.getlist('pages[]'))
+    # return 'success'
+    name = request.form['name']
+    date = request.form['date']
+    clientName = request.form['clientName']
+    contact = request.form['contact']
+    email = request.form['email']
+    projectName = request.form['projectName']
+    product = request.form['product']
+    received = request.form['received']
+    source = request.form['source']
+    totalCost = request.form['totalCost']
+    upfront = request.form['upfront']
+    remaining = request.form['remaining']
+    status = request.form['status']
+    remarks = request.form['remarks']
+    # print(name, price, quantity, date, sheet_name)
+    input_date = datetime.strptime(date, "%Y-%m-%d")
+    # Format the date as "M/D/YY"
+    date = f"{input_date.month}/{input_date.day}/{input_date.strftime('%Y')}"
+
+    row_to_append = [name, date, clientName, contact, email, projectName, product, received, source, totalCost, upfront, remaining, status, remarks]
+
+    wks = sh.worksheet('Total Sales')
+    wks.append_row(row_to_append)
+    return 'success'
+    # return redirect(url_for('employees'))
+
 @app.route("/pages", methods=["GET"])
 def pages():
     if not session or not session['loggedin']:
         return redirect(url_for('login'))
     if session['role'] == 1:
-        return render_template('pages.html', username=session['username'], role=session['role'])
+        sheets = []
+        for sheet in sh.worksheets():
+            sheets.append({'id': sheet.id, 'title': sheet.title})
+        return render_template('pages.html', username=session['username'], role=session['role'], sheets=sheets)
     
 @app.route("/getPages", methods=["GET"])
 def get_pages():
@@ -757,9 +843,10 @@ def add_page():
         name = request.form['name']
         id = request.form['id']
         access_token = request.form['access_token']
+        sheet = request.form['sheet']
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('INSERT INTO pages VALUES (%s, %s, %s)', (id, name, access_token))
+        cursor.execute('INSERT INTO pages VALUES (%s, %s, %s, %s)', (id, name, access_token, sheet))
         cursor.execute('INSERT INTO employee_pages (employee_id, page_id) VALUES (%s, %s)', (session['id'], id))
 
         mysql.connection.commit()
@@ -784,8 +871,10 @@ def edit_page(page_id):
         name = request.form['name']
         id = request.form['id']
         access_token = request.form['access_token']
+        sheet = request.form['sheet']
+
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('UPDATE pages SET id = %s, name = %s, access_token = %s WHERE id = %s', (id, name, access_token, page_id))
+        cursor.execute('UPDATE pages SET id = %s, name = %s, access_token = %s, sheet = %s WHERE id = %s', (id, name, access_token, sheet, page_id))
         mysql.connection.commit()
         return 'success'
     
@@ -825,6 +914,13 @@ def if_allowed(employee_id, conversation_id, timestamp):
     id = cursor.fetchone()
     return jsonify(id)
 
+@app.route("/getContact/<user_id>", methods=["GET"])
+def getContact(user_id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM contacts WHERE id = %s', (user_id,))
+    contact = cursor.fetchone()
+    return jsonify(contact)
+
 @app.route("/addContact", methods=["POST"])
 def addContact():
     try:
@@ -840,18 +936,48 @@ def addContact():
         city = data['city']
         state = data['state']
         postal_code = data['postalCode']
+        page_id = data['pageId']
+        project_name = data['projectName']
+        product = data['product']
 
         cursor = mysql.connection.cursor()
-        cursor.execute('INSERT INTO contacts VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (id, name, phone, email, month, day, address, city, state, postal_code))
+        cursor.execute('INSERT INTO contacts VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (id, name, phone, email, month, day, address, city, state, postal_code, project_name, product))
         
         mysql.connection.commit()
+
+        cursor.execute('SELECT sheet FROM pages WHERE id = %s', (page_id,))
+        sheet = cursor.fetchone()[0]
+        
         cursor.close()
+        
+        wks = sh.worksheet(sheet)
+
+        # Read the existing data to find the last S.no
+        existing_data = wks.get_all_records()
+        
+        # Assuming "S.no" is the column name
+        last_sno = 0
+        if existing_data:
+            last_row = existing_data[-1]
+            last_sno = int(last_row[next(iter(last_row))])
+
+        # Calculate the next S.no
+        next_sno = last_sno + 1
+
+        # Get the current date
+        current_date = datetime.now()
+
+        # Format the date in M/D/YYYY format
+        formatted_date = current_date.strftime('%m/%d/%Y')
+
+        row_to_append = [next_sno, formatted_date, name, phone, email, project_name, product]
+
+        wks.append_row(row_to_append)
 
         return jsonify({"message": "Contact added successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-
 @app.route("/editContact", methods=["POST"])
 def editContact():
     try:
@@ -866,13 +992,58 @@ def editContact():
         city = data['city']
         state = data['state']
         postal_code = data['postalCode']
+        page_id = data['pageId']
+        project_name = data['projectName']
+        product = data['product']
 
         cursor = mysql.connection.cursor()
-        cursor.execute('UPDATE contacts SET name = %s, phone = %s, email = %s, month = %s, day = %s, address = %s, city = %s, state = %s, postal_code = %s WHERE id = %s',
-                       (name, phone, email, month, day, address, city, state, postal_code, id))
+        cursor.execute('UPDATE contacts SET name = %s, phone = %s, email = %s, month = %s, day = %s, address = %s, city = %s, state = %s, postal_code = %s, project_name = %s, product = %s WHERE id = %s',
+                       (name, phone, email, month, day, address, city, state, postal_code, project_name, product, id))
         
         mysql.connection.commit()
+        
+        cursor.execute('SELECT sheet FROM pages WHERE id = %s', (page_id,))
+        sheet = cursor.fetchone()[0]
+
         cursor.close()
+        
+        wks = sh.worksheet(sheet)
+
+        # Read the existing data to find the last S.no
+        existing_data = wks.get_all_records()
+        
+        # Assuming "S.no" is the column name
+        last_sno = 0
+        if existing_data:
+            last_row = existing_data[-1]
+            last_sno = int(last_row[next(iter(last_row))])
+
+        # Calculate the next S.no
+        next_sno = last_sno + 1
+
+        # Get the current date
+        current_date = datetime.now()
+
+        # Format the date in M/D/YYYY format
+        formatted_date = current_date.strftime('%m/%d/%Y')
+
+        row_to_append = [next_sno, formatted_date, name, phone, email, project_name, product]
+        
+        # Search for a row with the same name, phone, email, or project name
+        for index, row in enumerate(existing_data):
+            if (
+                row["Client Name"] == name and name != ''
+                or row["Contact"] == phone and phone != ''
+                or row["Email"] == email and email != ''
+                or row["Project Name"] == project_name and project_name != ''
+            ):
+                # Replace the existing row with the new data
+                wks.delete_rows(index + 2)  # +2 because Google Sheets is 1-indexed, and we want to delete the correct row
+                wks.insert_row(row_to_append, index=index + 2)  # Insert the new row in place
+                break  # Exit the loop after the replacement
+        else:
+            # If no matching row is found, simply append the new row to the end
+            wks.append_row(row_to_append)
 
         return jsonify({"message": "Contact edited successfully"}), 200
     except Exception as e:

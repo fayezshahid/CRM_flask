@@ -36,37 +36,74 @@
     cursor: pointer;
 }
 
-.icons.active{
-    border: #c3bdbd 2px solid;
-    border-radius: 5px;
-    background-color: #c3bdbd;
-    color: black;
+.icons a{
+    display: flex;
+    text-decoration: none !important;
 }
 
 
-/* .icon-text{
+.active{
+    border: #c3bdbd 2px solid;
+    border-radius: 5px;
+    background-color: #c3bdbd;
+    color: black !important;
+}
+
+
+.icon-text{
     display: flex !important;
-    float: right;
-    padding-right: 50px;
-} */
+    padding-left: 10px;
+}
 
 .sidebar{
-    /* max-width: 160px !important; */
-    max-width: 63px !important;
+    /* max-width: 63px !important; */
+    max-width: 100%;
+}
+
+.icons{
+    display: flex !important;
+    padding-right: 0px;
 }
 
 .icon-text{
     display: none;
 }
 
-.sidebar:hover{
+/* .sidebar:hover{
     max-width: 100% !important;
+} */
+
+/* .sidebar:hover .icon-text {
+    display: flex !important;
+    padding-left: 10px;
+} */
+
+/* .sidebar:hover .icons {
+    display: flex !important;
+    padding-right: 0px;
+} */
+
+/* .sidebar:hover .pages {
+    display: flex !important;
+    text-decoration: none;
+    padding-left: 15px;
+    color: white;
+} */
+
+/* .sidebar:hover .pages:hover{
+    color: gray;
+} */
+
+.pages{
+    display: flex !important;
+    text-decoration: none;
+    padding-left: 15px;
+    color: white;
 }
 
-.sidebar:hover .icon-text {
-    display: flex !important;
-    float: right;
-    padding-right: 10px;
+.pages:hover{
+    color: gray;
+    text-decoration: none;
 }
 
 /* message */
@@ -89,7 +126,7 @@
 }
 
 .message-icons{
-    width: 20%;
+    width: 15%;
     display: flex;
     justify-content: space-between;
     padding: 0 20px;
@@ -220,6 +257,8 @@ body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
+    max-height: 100vh;
+    overflow: hidden;
 }
 
 nav {
@@ -300,4 +339,17 @@ nav {
     color: red;
     margin-right: 7px;
     cursor: pointer;
+}
+
+.emojionearea, .emojionearea.form-control{
+    border: none !important;
+}
+
+input.emojionearea-editor{
+    border: none !important;
+    outline: none !important;
+}
+
+.message-box{
+    text-align: left;
 }

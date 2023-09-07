@@ -1,0 +1,247 @@
+{% extends "index.html" %}
+{% block content %}
+<input type="hidden" id="isActiveElement" value="sheet">
+<div class="mt-5" style="max-height: 85vh; overflow-y: auto;">
+    <!-- <h2>Bootstrap Table Example</h2> -->
+    <div class="d-flex justify-content-between mb-3">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#modal">Add Total Sales</button>
+        <select class="form-control w-25" onchange="loadSheetData(this.value)" name="" id="sheets">
+            {% for sheet in sheets %}
+                {% if sheet.title == 'Total Sales'  %}
+                    {% if role == 1 %}
+                        <option value="{{ sheet.title }}">{{ sheet.title }}</option>
+                    {% endif %}
+                {% endif %}
+                {% if sheet.title != 'Total Sales'  %}
+                    <option value="{{ sheet.title }}">{{ sheet.title }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <table class="table table-striped">
+        <thead id="table-head">
+            <!-- <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+            </tr> -->
+        </thead>
+        <tbody id="table-body">
+            <!-- <tr>
+                <td>1</td>
+                <td>John Doe</td>
+                <td>john@example.com</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Jane Smith</td>
+                <td>jane@example.com</td>
+            </tr> -->
+            <!-- Add more rows as needed -->
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+            <form id="form">
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="name">A.Name:</label>
+                        <input type="text" class="form-control" id="name" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date:</label>
+                        <input type="date" style="width: 100%;" class="form-control" id="date" name="date">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="clientName">Client Name:</label>
+                        <input type="text" class="form-control" id="clientName" name="clientName">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact">Contact:</label>
+                        <input type="tel" class="form-control" id="contact" name="contact">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="projectName">Project Name:</label>
+                        <input type="text" class="form-control" id="projectName" name="projectName">
+                    </div>
+                    <div class="form-group">
+                        <label for="product">Product:</label>
+                        <input type="text" class="form-control" id="product" name="product">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="received">Received:</label>
+                        <input type="text" class="form-control" id="received" name="received">
+                    </div>
+                    <div class="form-group">
+                        <label for="source">Source:</label>
+                        <input type="text" class="form-control" id="source" name="source">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group" style="width: 35%;">
+                        <label for="totalCost">Total Cost:</label>
+                        <input type="text" style="width: 90%;" class="form-control" id="totalCost" name="totalCost">
+                    </div>
+                    <div class="form-group" style="width: 30%;">
+                        <label for="upfront">Upfront:</label>
+                        <input type="text" style="width: 90%;" class="form-control" id="upfront" name="upfront">
+                    </div>
+                    <div class="form-group" style="width: 35%;">
+                        <label for="remaining">Remaining:</label>
+                        <input type="text" class="form-control" id="remaining" name="remaining">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <input type="text" class="form-control" id="status" name="status">
+                    </div>
+                    <div class="form-group">
+                        <label for="remarks">Remarks:</label>
+                        <textarea id="remarks" class="form-control" name="remarks"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="addToTotalSale()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        loadSheetData($('#sheets').val())
+        // Get the current date in the format "YYYY-MM-DD"
+        const today = new Date().toISOString().split('T')[0];
+
+        // Set the default value of the date input to today's date
+        document.getElementById('date').value = today;
+    });
+
+    function loadSheetData(sheet){
+        $.ajax({
+            url: '/getSheets/'+sheet,
+            type: 'GET',
+            success: function(data){
+                $('#table-head').html('')
+                $('#table-body').html('')
+                console.log(data)
+                if(sheet == 'Total Sales'){
+                    var obj = Object.entries(data[0])
+                    $('#table-head').html(`
+                        <tr>
+                            <th>${obj[0][0]}</th>
+                            <th>${obj[1][0]}</th>
+                            <th>${obj[2][0]}</th>
+                            <th>${obj[3][0]}</th>
+                            <th>${obj[4][0]}</th>
+                            <th>${obj[5][0]}</th>
+                            <th>${obj[6][0]}</th>
+                            <th>${obj[7][0]}</th>
+                            <th>${obj[8][0]}</th>
+                            <th>${obj[9][0]}</th>
+                            <th>${obj[10][0]}</th>
+                            <th>${obj[11][0]}</th>
+                            <th>${obj[12][0]}</th>
+                            <th>${obj[13][0]}</th>
+                        </tr>
+                    `)
+                    for(var i=0; i<data.length; i++){
+                        var obj = Object.entries(data[i])
+                        $('#table-body').append(`
+                            <tr>
+                                <td>${obj[0][1]}</td>
+                                <td>${obj[1][1]}</td>
+                                <td>${obj[2][1]}</td>
+                                <td>${obj[3][1]}</td>
+                                <td>${obj[4][1]}</td>
+                                <td>${obj[5][1]}</td>
+                                <td>${obj[6][1]}</td>
+                                <td>${obj[7][1]}</td>
+                                <td>${obj[8][1]}</td>
+                                <td>${obj[9][1]}</td>
+                                <td>${obj[10][1]}</td>
+                                <td>${obj[11][1]}</td>
+                                <td>${obj[12][1]}</td>
+                                <td>${obj[13][1]}</td>
+                            </tr>
+                        `)
+                    }
+                }
+                else{
+                    var obj = Object.entries(data[0])
+                    $('#table-head').html(`
+                        <tr>
+                            <th>${obj[0][0]}</th>
+                            <th>${obj[1][0]}</th>
+                            <th>${obj[2][0]}</th>
+                            <th>${obj[3][0]}</th>
+                            <th>${obj[4][0]}</th>
+                        </tr>
+                    `)
+                    for(var i=0; i<data.length; i++){
+                        var obj = Object.entries(data[i])
+                        $('#table-body').append(`
+                            <tr>
+                                <td>${obj[0][1]}</td>
+                                <td>${obj[1][1]}</td>
+                                <td>${obj[2][1]}</td>
+                                <td>${obj[3][1]}</td>
+                                <td>${obj[4][1]}</td>
+                            </tr>
+                        `)
+                    }
+                }
+            }
+        })
+    }
+
+    function addToTotalSale(){
+        //fetch data from form
+        var form = document.getElementById('form');            
+        $.ajax({
+            url: '/addSale',
+            type: 'POST',
+            data: new FormData(form),
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                $('#modal').modal('hide')
+                toastr.success('Sale Added');
+                $('#form').trigger("reset");
+                // Get the current date in the format "YYYY-MM-DD"
+                const today = new Date().toISOString().split('T')[0];
+                // Set the default value of the date input to today's date
+                document.getElementById('date').value = today;
+                $('#sheets').val('Total Sales')
+                loadSheetData('Total Sales');
+            },
+            error: function(error) {
+                toastr.error(error);
+            }
+        });
+    }
+
+
+
+</script>
+{% endblock %}

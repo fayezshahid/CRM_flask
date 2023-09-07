@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block content %}
     <input type="hidden" id="isActiveElement" value="page">
-    <div class="container">
+    <div class="container" style="max-height: 85vh; overflow-y: auto;">
         <div class="d-flex justify-content-between" style="margin: 10px 0;">
             <h1>Pages</h1>
             <button type="button" data-toggle="modal" data-target="#modal" class="btn btn-success">Add Page</button>
@@ -24,6 +24,17 @@
                                     <label for="">Page Access Token</label>
                                     <input type="password" id="access_token" class="form-control" name="access_token" placeholder="Enter Page Access Token">
                                 </div>
+                                <div class="form-group">
+                                    <label for="">Sheet</label>
+                                    <select class="form-control" name="sheet" id="sheets">
+                                        <option selected disabled>Select a Sheet</option>
+                                        {% for sheet in sheets %}
+                                            {% if sheet.title != 'Total Sales' %}
+                                                <option value="{{ sheet.title }}">{{ sheet.title }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -39,7 +50,7 @@
                     <th>Page Name</th>
                     <th>Page ID</th>
                     <th>Page Access Token</th>
-                    <!-- <th>Role</th> -->
+                    <th>Sheet</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -52,9 +63,16 @@
 
 {% block scripts %}
     <script>
+        var sheets;
 
         $(document).ready(function() {
-            loadPages()
+            var allOptions = $("#sheets").find("option");
+            
+            sheets = allOptions.map(function() {
+                return $(this).text();
+            }).get();
+            
+            loadPages();
         });
 
         function loadPages(){
@@ -67,11 +85,16 @@
                     for(var i=0; i<data.length; i++)
                     {
                         var displayedToken = data[i].access_token.substr(0, 10) + "........." + data[i].access_token.substr(-10);
+                        var element = '';
+                        for(var j=0; j<sheets.length; j++){
+                            element += `<option value="${sheets[j]}" ${sheets[j] == data[i].sheet ? 'selected' : ''}>${sheets[j]}</option>`
+                        }
                         $('tbody').append(`
                             <tr>
                                 <td>${data[i].name}</td>
                                 <td>${data[i].id}</td>
                                 <td>${displayedToken}</td>
+                                <td>${data[i].sheet}</td>
                                 <td>
                                     <button type="button" data-toggle="modal" data-target="#modal${data[i].id}" class="btn btn-warning">Edit</button>
                                     <button type="button" onclick="deletePage('${data[i].id}')" class="btn btn-danger">Delete</button>
@@ -92,6 +115,12 @@
                                                             <div class="form-group">
                                                                 <label for="">Password</label>
                                                                 <input type="text" id="access_token${data[i].id}" class="form-control" name="access_token" value="${data[i].access_token}" placeholder="Enter Page Access Token">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="">Sheet</label>
+                                                                <select class="form-control" name="sheet" id="sheet${data[i].id}">
+                                                                    ${element}
+                                                                </select>
                                                             </div>
                                                         </form>
                                                     </div>
