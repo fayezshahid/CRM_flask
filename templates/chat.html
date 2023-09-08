@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 {% block content %}
-  <audio id="notificationSound" src="facebook_messenger.mp3"></audio>
+  <audio id="notificationSound" src="{{url_for('static', filename='message.mp3')}}"></audio>
   <input type="hidden" id="isActiveElement" value="chat">
   <input type="hidden" id="currentPage" value="{{ page_id }},{{ access_token }},{{ page_name }}">
   <!-- <div class="row" style="margin-top: 10px;">
@@ -476,9 +476,9 @@
               lastMessage = 'You: ' + lastMessage;
             }
             $('#chats').append(`
-              <div class="conversation" id="chat${data[i].id}">
+              <div class="conversation ${data[i].timestamp > data[i].read_timestamp ? 'unread' : ''}" id="chat${data[i].id}">
                 <li class="list-group-item bot-bubble rounded-bubble" onclick="getMessages('${data[i].id}')">${data[i].name}
-                <span class="timestamp">${formattedDate}</span>  
+                <span id="timestamp${data[i].id}" class="timestamp">${formattedDate}</span>  
                 <div class="last_message" id="last_message${data[i].id}">${lastMessage}</div>
               </div>
             `)
@@ -499,6 +499,7 @@
       $('.conversation').removeClass('selected');
       // Add 'selected' class to the clicked conversation
       $('#chat' + id).addClass('selected');
+      $('#chat' + id).removeClass('unread');
       // console.log($(this))
       current_conversation_id = id;
       console.log(id);
@@ -1181,8 +1182,46 @@
               }
               
               $('#last_message' + data.data.conversation_id).text(received_message.message)
-              
             }
+
+            const currentDate = new Date();
+            const timestamp = new Date(data.data.messages[0].timestamp);
+            // Calculate the time difference in milliseconds between the two dates
+            const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp);
+
+            // Calculate the number of days between the two dates
+            const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+            // console.log(daysDifference)
+            if (daysDifference < 1){
+              const options = {
+                // weekday: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+              };
+              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp);
+            }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+              const options = {
+                weekday: 'short',
+                // hour: 'numeric',
+                // minute: 'numeric',
+                // hour12: true
+              };
+              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp); // Output: Wed 6:14 PM
+            } else {
+              // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
+              formattedDate = new Intl.DateTimeFormat('en-US', {
+                // year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                // hour: 'numeric',
+                // minute: 'numeric',
+                // hour12: true
+              }).format(timestamp);
+            }
+            
+            $('#timestamp' + data.data.conversation_id).text(formattedDate)
+            $('#chat' + data.data.conversation_id).addClass('unread')
           }
         },
         error: function (xhr, status, error) {
