@@ -14,7 +14,7 @@
   </div> -->
   <div style="margin-right: 0; margin-top: 10px; margin-left: 0; padding: 0 20px;">
     {% if role == 1 %}
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-10" style="border: 1px solid rgba(0,0,0,.125);">
         <div class="tabs">
           <div class="tab-pills" id="all" onclick="switchTabBtn(this.id)">
@@ -31,7 +31,7 @@
       <div class="col-2">
 
       </div>
-    </div>
+    </div> -->
     {% endif %}
     <div class="row">
         <div class="col-3" style="padding: 0;">
@@ -52,9 +52,9 @@
                 </nav>
                 {% endif %} -->
                 <div class="filter-box">
-                  <input type="text" class="form-control" placeholder="Search">
+                  <input type="text" class="form-control" onkeyup="search(this.value)" placeholder="Search">
                   <div class="d-flex justify-content-between" style="padding: 10px 15px 0 15px;">
-                    <div class="filter-pills">
+                    <!-- <div class="filter-pills">
                       Unread
                     </div>
                     <div class="filter-pills">
@@ -65,7 +65,7 @@
                     </div>
                     <div class="filter-pills">
                       Spam
-                    </div>
+                    </div> -->
                   </div>
                 </div>
                 <div class="conversation-box">
@@ -548,19 +548,27 @@
           $('#contact-card').show()
           // console.log(current_user_id)
           // console.log(current_user_name)
+
+          // $('.chat-header').html(`
+          //   <div class="d-flex justify-content-between" style="margin-bottom: 10px">
+          //     <h5 id="chatName">${current_user_name}</h5>
+          //     <div>
+          //       <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to spam" style="margin-right: 5px;"><i class="fa-solid fa-circle-exclamation"></i></button>
+          //       <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Marks as follow up" style="margin-right: 5px;"><i class="fa-solid fa-star"></i></button>
+          //       <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as unread" style="margin-right: 5px;"><i class="fa-solid fa-envelope"></i></button>
+          //       <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as important" style="margin-right: 5px;"><i class="fa-solid fa-exclamation"></i></button>
+          //       <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to done" style="margin-right: 5px;"><i class="fa-solid fa-check"></i></button>
+          //       <button type="button" id="toggleRadioButtons" onclick="showRadioButtons()" class="btn btn-outline-secondary"><i class="fa-solid fa-share"></i></button>
+          //     </div>
+          //   </div>
+          // `);
+
           $('.chat-header').html(`
             <div class="d-flex justify-content-between" style="margin-bottom: 10px">
               <h5 id="chatName">${current_user_name}</h5>
-              <div>
-                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to spam" style="margin-right: 5px;"><i class="fa-solid fa-circle-exclamation"></i></button>
-                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Marks as follow up" style="margin-right: 5px;"><i class="fa-solid fa-star"></i></button>
-                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as unread" style="margin-right: 5px;"><i class="fa-solid fa-envelope"></i></button>
-                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Mark as important" style="margin-right: 5px;"><i class="fa-solid fa-exclamation"></i></button>
-                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Move to done" style="margin-right: 5px;"><i class="fa-solid fa-check"></i></button>
-                <button type="button" id="toggleRadioButtons" onclick="showRadioButtons()" class="btn btn-outline-secondary"><i class="fa-solid fa-share"></i></button>
-              </div>
             </div>
           `);
+
           // $('.chat-header').html(`
           //   <div class="d-flex justify-content-between">
           //     <h5 id="chatName">${data[0]}</h5>
@@ -736,6 +744,20 @@
           var element = document.querySelector(".chat-box");
           element.scrollTop = element.scrollHeight;
         },
+      });
+    }
+
+    function search(value){
+      const searchTerm = value;
+  
+      // Loop through your conversation data and filter based on the user's input
+      $('#chats .conversation').each(function() {
+        const conversationName = $(this).text().toLowerCase();
+        if (conversationName.includes(searchTerm)) {
+          $(this).show();  // Show the conversation if it matches the search
+        } else {
+          $(this).hide();  // Hide the conversation if it doesn't match the search
+        }
       });
     }
 

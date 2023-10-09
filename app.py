@@ -158,7 +158,7 @@ def getConversationDict(page_id, page_access_token, platform = None):
     # return messenger_conversations
 
     if platform == 'insta':
-        return instagram_conversations
+        return messenger_conversations
     elif platform == 'fb':
         return messenger_conversations
     else:
@@ -171,7 +171,7 @@ def getConversationDict(page_id, page_access_token, platform = None):
             all_conversations[id] = conversation
 
         sorted_conversations = dict(sorted(all_conversations.items(), key=lambda x: x[1]['messages'][0]['timestamp'], reverse=True))
-        return sorted_conversations
+        return messenger_conversations
 
 sorted_conversations = {}
 messenger_conversations = {}
