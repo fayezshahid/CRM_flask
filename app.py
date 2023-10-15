@@ -20,6 +20,8 @@ INSTA_ID = '17841405286734922'
 PAGE_ACCESS_TOKEN = 'EAAJLYZCAAqKwBAFpDeAsxqKGZCB9Gmirqpzr0tcDOJGlQ1G951V6wTk904kISIcvekZBmAqwso9KycRpQuxn1lznnjZB8myHLIZBqPJbXyXOn8b0DYjZB3Mgp9p6MK6TEZAmOgvYUykearZBo5FqZCo9a8ubZAuGnJwwJdj6xZALgoGsYHUYFaRpRm6'
 # PAGE_ACCESS_TOKEN_INSTA = 'EAAJLYZCAAqKwBAAAm4iAGdGQx1GD2WZBmdMlpj82uQEbZBXElLPZB86Wgl9UjzO8ckqzxQXyeZBX4Ta6An8hL5c36HOo0ZCrSjbtW1V4Ur0FGRZBRWmK0HuSsnge4A81v9ANaHDuF9IiLfPZBVY8GXDe3GxqZB92y5vfPxJoZA58tM3ySd7dqmO7iV'
 
+google_sheet_name = 'Lead Sheet'
+
 app = Flask(__name__)
 
 # CORS(app, resources={r"/*": {"origins": "*"}})
@@ -35,16 +37,53 @@ app.config['MYSQL_DB'] = 'crm'
 mysql = MySQL(app)
 
 def process_conversations(data):
+    if 'data' not in data:
+        return {}, None
+    
+    try:
+        next_page_url = data['paging']['next']
+    except:
+        next_page_url = None
+        
+    # while next_page_url:
+    #     print('fayez')
+    #     next_page_data = requests.get(next_page_url).json()
+    #     data['data'].extend(next_page_data['data'])
+    #     try:
+    #         next_page_url = next_page_data['paging']['next']
+    #     except:
+    #         next_page_url = None
+
+    # print('processing messages now')
+            
     conversations = {}
-    for conversation in data:
+    for conversation in data['data']:
+        try:
+            next_page_url_2 = conversation['messages']['paging']['next']
+        except:
+            next_page_url_2 = None
+
+        # while next_page_url:
+        #     next_page_data = requests.get(next_page_url).json()
+        #     conversation['messages']['data'].extend(next_page_data['data'])
+        #     try:
+        #         next_page_url = next_page_data['paging']['next']
+        #     except:
+        #         next_page_url = None
+
         participants = conversation['participants']['data']
         messages = []
         for message in conversation['messages']['data']:
+            # print(message)
             attachments = []
             if 'attachments' in message:
                 for attachment in message['attachments']['data']:
+                    # print(attachment)
                     name = attachment['name']
-                    size = attachment['size']
+                    try:
+                        size = attachment['size']
+                    except:
+                        size = ''
                     if 'image' in attachment['mime_type']:
                         # attachment_type = 'image_data'
                         attachments.append({
@@ -90,7 +129,8 @@ def process_conversations(data):
                 'id': id,
                 'name': name,
                 'messages': messages,
-                'read_timestamp': messages[0]['timestamp']
+                'read_timestamp': messages[0]['timestamp'],
+                'next_page_url': next_page_url_2
             }
             conversations[conversation['id']] = conversation_dict
 
@@ -103,7 +143,58 @@ def process_conversations(data):
             # print('fayez')
             conversations[x['id']]['read_timestamp'] = x['timestamp']
 
-    return conversations
+    return conversations, next_page_url
+
+def process_messages(data):
+    try:
+        next_page_url = data['paging']['next']
+    except:
+        next_page_url = None
+
+    messages = []
+    for message in data['data']:
+        # print(message)
+        attachments = []
+        if 'attachments' in message:
+            for attachment in message['attachments']['data']:
+                # print(attachment)
+                name = attachment['name']
+                try:
+                    size = attachment['size']
+                except:
+                    size = ''
+                if 'image' in attachment['mime_type']:
+                    # attachment_type = 'image_data'
+                    attachments.append({
+                        'type': attachment['mime_type'],
+                        'name': name,
+                        'size': size,
+                        'url': attachment['image_data']['preview_url']
+                    })
+                elif 'video' in attachment['mime_type']:
+                    # attachment_type = 'video_data'
+                    attachments.append({
+                        'type': attachment['mime_type'],
+                        'name': name,
+                        'size': size,
+                        'url': attachment['video_data']['url']
+                    })
+                elif 'application' in attachment['mime_type']:
+                    attachments.append({
+                        'type': attachment['mime_type'],
+                        'name': name,
+                        'size': size,
+                        'url': attachment['file_url']
+                    })
+        messages.append({
+            'message_id': message['id'],
+            'message': message['message'],
+            'timestamp': message['created_time'],
+            'from': message['from']['id'],
+            'to': message['to']['data'][0]['id'],
+            'attachments': attachments
+        })
+    return messages, next_page_url
 
 def sort_conversations(conversation_id, platform):
     global sorted_conversations, messenger_conversations, instagram_conversations
@@ -137,11 +228,8 @@ def getConversationDict(page_id, page_access_token, platform = None):
         params=instagram_params
     )
     # print(instagram_conversations.json())
-    try:
-        instagram_data = instagram_conversations.json()['data']
-    except:
-        instagram_data = []
-    instagram_conversations = process_conversations(instagram_data)
+    instagram_data = instagram_conversations.json()
+    instagram_conversations, next_instagram_page_url = process_conversations(instagram_data)
     # return instagram_conversations
     
     # elif platform == 'fb':
@@ -153,14 +241,14 @@ def getConversationDict(page_id, page_access_token, platform = None):
         params=messenger_params
     )
     # print(messenger_conversations.json())
-    messenger_data = messenger_conversations.json()['data']
-    messenger_conversations = process_conversations(messenger_data)
+    messenger_data = messenger_conversations.json()
+    messenger_conversations, next_messenger_page_url = process_conversations(messenger_data)
     # return messenger_conversations
 
     if platform == 'insta':
-        return messenger_conversations
+        return messenger_conversations, next_instagram_page_url
     elif platform == 'fb':
-        return messenger_conversations
+        return messenger_conversations, next_messenger_page_url
     else:
         # Merge conversations and sort by timestamp in descending order
         all_conversations = {}
@@ -272,11 +360,13 @@ def getConversations(page_id, page_access_token, platform):
     PAGE_ACCESS_TOKEN = page_access_token
     if session['role'] == 1:
         if platform == 'fb':
-            messenger_conversations = getConversationDict(page_id, page_access_token, platform)
-            return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp'], 'read_timestamp': details['read_timestamp']} for conv_id,details in messenger_conversations.items()]
+            messenger_conversations, next_messenger_page_url = getConversationDict(page_id, page_access_token, platform)
+            result = [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp'], 'read_timestamp': details['read_timestamp']} for conv_id,details in messenger_conversations.items()]
+            result.append(next_messenger_page_url)
+            return result
         elif platform == 'insta':
-            instagram_conversations = getConversationDict(page_id, page_access_token, platform)
-            return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp'], 'read_timestamp': details['read_timestamp']} for conv_id,details in instagram_conversations.items()]
+            instagram_conversations, next_instagram_page_url = getConversationDict(page_id, page_access_token, platform)
+            return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp'], 'read_timestamp': details['read_timestamp']} for conv_id,details in instagram_conversations.items()], next_instagram_page_url
         elif platform == 'all':
             sorted_conversations = getConversationDict(page_id, page_access_token)
             return [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp'], 'read_timestamp': details['read_timestamp']} for conv_id,details in sorted_conversations.items()]
@@ -297,20 +387,51 @@ def getConversations(page_id, page_access_token, platform):
         # return [{'id': conv_id, 'name': details['name']} for conv_id,details in conversations.items()]
         return convs
     
-@app.route('/getMessages/<conversation_id>', methods=['GET'])
-def getMessages(conversation_id):
+@app.route('/getMoreConversations', methods=['GET'])
+def getMoreConversations():
+    page_url = request.args.get('page_url')
+    platform = request.args.get('platform')
+
+    next_page_data = requests.get(page_url).json()
+    temporary_conversations, next_page_url = process_conversations(next_page_data)
+    # print(next_page_url)
+    # print(temporary_conversations)
+    # print(sorted_conversations)
+    global sorted_conversations, messenger_conversations, instagram_conversations
+    for id,conversation in temporary_conversations.items():
+        if platform == 'fb':
+            messenger_conversations[id] = conversation
+        elif platform == 'insta':
+            instagram_conversations[id] = conversation
+        elif platform == 'all':
+            sorted_conversations[id] = conversation
+
+    result = [{'id': conv_id, 'name': details['name'], 'last_message': details['messages'][0]['message'], 'sender': details['messages'][0]['from'], 'timestamp': details['messages'][0]['timestamp'], 'read_timestamp': details['read_timestamp']} for conv_id,details in temporary_conversations.items()]
+    result.append(next_page_url)
+    return result
+
+@app.route('/getMessages/<conversation_id>/<platform>', methods=['GET'])
+def getMessages(conversation_id, platform):
     # conversations = sorted_conversations
+    if platform == 'fb':
+        messenger_conversations[conversation_id]['read_timestamp'] = messenger_conversations[conversation_id]['messages'][0]['timestamp'] 
+        temporary_conversations = messenger_conversations
+    elif platform == 'insta':
+        instagram_conversations[conversation_id]['read_timestamp'] = instagram_conversations[conversation_id]['messages'][0]['timestamp'] 
+        temporary_conversations = instagram_conversations
+    elif platform == 'all':
+        sorted_conversations[conversation_id]['read_timestamp'] = sorted_conversations[conversation_id]['messages'][0]['timestamp'] 
+        temporary_conversations = sorted_conversations
+
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute('SELECT timestamp FROM message_reads WHERE id = %s', (conversation_id,))
     data = cursor.fetchone()
-
-    if data and data['timestamp'] != sorted_conversations[conversation_id]['messages'][0]['timestamp']:
-        cursor.execute('UPDATE message_reads SET timestamp = %s where id = %s', (sorted_conversations[conversation_id]['messages'][0]['timestamp'],conversation_id))
+    
+    if data and data['timestamp'] != temporary_conversations[conversation_id]['messages'][0]['timestamp']:
+        cursor.execute('UPDATE message_reads SET timestamp = %s where id = %s', (temporary_conversations[conversation_id]['messages'][0]['timestamp'],conversation_id))
     elif data == None:
-        cursor.execute('INSERT INTO message_reads (id, timestamp) VALUES (%s, %s)', (conversation_id, sorted_conversations[conversation_id]['messages'][0]['timestamp']))
+        cursor.execute('INSERT INTO message_reads (id, timestamp) VALUES (%s, %s)', (conversation_id, temporary_conversations[conversation_id]['messages'][0]['timestamp']))
     mysql.connection.commit()
-
-    sorted_conversations[conversation_id]['read_timestamp'] = sorted_conversations[conversation_id]['messages'][0]['timestamp'] 
 
     if session['role'] > 2:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -321,19 +442,41 @@ def getMessages(conversation_id):
         print(timestamp)
         messages = []
 
-        for message in sorted_conversations[conversation_id]['messages']:
+        for message in temporary_conversations[conversation_id]['messages']:
             # print(message['timestamp'], timestamp)
             if message['timestamp'] > timestamp:
                 messages.append(message)
 
-        return [{"id": sorted_conversations[conversation_id]['id'], "name": sorted_conversations[conversation_id]['name']}, messages]
+        return [{"id": temporary_conversations[conversation_id]['id'], "name": temporary_conversations[conversation_id]['name']}, messages]
     else:
         # print( conversations[conversation_id])
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         # print(sorted_conversations)
-        cursor.execute('SELECT * FROM contacts WHERE id = %s', (sorted_conversations[conversation_id]['id'],))
+        cursor.execute('SELECT * FROM contacts WHERE id = %s', (temporary_conversations[conversation_id]['id'],))
         data = cursor.fetchone()
-        return [{"id": sorted_conversations[conversation_id]['id'], "name": sorted_conversations[conversation_id]['name']}, sorted_conversations[conversation_id]['messages'], data]
+        return [{"id": temporary_conversations[conversation_id]['id'], "name": temporary_conversations[conversation_id]['name']}, temporary_conversations[conversation_id]['messages'], data, temporary_conversations[conversation_id]['next_page_url']]
+
+@app.route('/getMoreMessages', methods=['GET'])
+def getMoreMessages():
+    conversation_id = request.args.get('conversation_id')
+    page_url = request.args.get('page_url')
+    platform = request.args.get('platform')
+
+    next_page_data = requests.get(page_url).json()
+    temporary_messages, next_page_url = process_messages(next_page_data)
+
+    global sorted_conversations, messenger_conversations, instagram_conversations
+    if platform == 'fb':
+        messenger_conversations[conversation_id]['messages'].extend(temporary_messages)
+        messenger_conversations[conversation_id]['next_page_url'] = next_page_url
+    elif platform == 'insta':
+        instagram_conversations[conversation_id]['messages'].extend(temporary_messages)
+        instagram_conversations[conversation_id]['next_page_url'] = next_page_url
+    elif platform == 'all':
+        sorted_conversations[conversation_id]['messages'].extend(temporary_messages)
+        sorted_conversations[conversation_id]['next_page_url'] = next_page_url
+
+    return [temporary_messages, next_page_url]
 
 @app.route("/checkMessage", methods=["GET", "POST"])
 def check_message():
@@ -761,7 +904,7 @@ def delete_employee(employee_id):
         return redirect(url_for('login'))
     if session['role'] == 1:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('DELETE FROM EMPLOYEES WHERE id = %s', (employee_id,))
+        cursor.execute('DELETE FROM employees WHERE id = %s', (employee_id,))
         mysql.connection.commit()
         return 'success'
     
@@ -774,7 +917,7 @@ def edit_employee(employee_id):
         password = request.form['password']
         role = request.form['role']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('UPDATE EMPLOYEES SET username = %s, password = %s, role_id = %s WHERE id = %s', (username, password, role, employee_id))
+        cursor.execute('UPDATE employees SET username = %s, password = %s, role_id = %s WHERE id = %s', (username, password, role, employee_id))
         mysql.connection.commit()
         return 'success'
     
@@ -786,7 +929,7 @@ def sheets():
     # print(sh.worksheets()[0])
     sheets = []
     gc = gspread.service_account(filename='credentials.json')
-    sh = gc.open('Sales')
+    sh = gc.open(google_sheet_name)
     for sheet in sh.worksheets():
         sheets.append({'id': sheet.id, 'title': sheet.title})
     # text = str(sh.worksheets()[0])
@@ -800,7 +943,7 @@ def sheets():
 @app.route("/getSheets/<sheet_name>", methods=["GET"])
 def getSheets(sheet_name):
     gc = gspread.service_account(filename='credentials.json')
-    sh = gc.open('Sales')
+    sh = gc.open(google_sheet_name)
     wks = sh.worksheet(unquote(sheet_name))
     data = wks.get_all_records()
     return data
@@ -835,7 +978,7 @@ def add_sale():
     row_to_append = [name, date, clientName, contact, email, projectName, product, received, source, totalCost, upfront, remaining, status, remarks]
 
     gc = gspread.service_account(filename='credentials.json')
-    sh = gc.open('Sales')
+    sh = gc.open(google_sheet_name)
     wks = sh.worksheet('Total Sales')
     wks.append_row(row_to_append)
     return 'success'
@@ -848,7 +991,7 @@ def pages():
     if session['role'] == 1:
         sheets = []
         gc = gspread.service_account(filename='credentials.json')
-        sh = gc.open('Sales')
+        sh = gc.open(google_sheet_name)
         for sheet in sh.worksheets():
             sheets.append({'id': sheet.id, 'title': sheet.title})
         return render_template('pages.html', username=session['username'], role=session['role'], sheets=sheets)
@@ -872,7 +1015,11 @@ def add_page():
         name = request.form['name']
         id = request.form['id']
         access_token = request.form['access_token']
-        sheet = request.form['sheet']
+
+        try:
+            sheet = request.form['sheet']
+        except:
+            sheet = ''
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('INSERT INTO pages VALUES (%s, %s, %s, %s)', (id, name, access_token, sheet))
@@ -980,7 +1127,7 @@ def addContact():
         cursor.close()
         
         gc = gspread.service_account(filename='credentials.json')
-        sh = gc.open('Sales')
+        sh = gc.open(google_sheet_name)
         wks = sh.worksheet(sheet)
 
         # Read the existing data to find the last S.no
@@ -1039,7 +1186,7 @@ def editContact():
         cursor.close()
         
         gc = gspread.service_account(filename='credentials.json')
-        sh = gc.open('Sales')
+        sh = gc.open(google_sheet_name)
         wks = sh.worksheet(sheet)
 
         # Read the existing data to find the last S.no

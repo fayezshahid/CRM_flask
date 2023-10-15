@@ -144,6 +144,7 @@ input[type="radio"] {
 .chat-message{
     /* display: unset; */
     width: fit-content;
+    max-width: 60%;
 }
 .chat-bubble-send {
     /* display: flex; */
@@ -334,6 +335,10 @@ nav {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+.conversation{
+    overflow: hidden;
 }
 
 .conversation.new-message {

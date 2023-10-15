@@ -118,7 +118,6 @@
         </div>
         <div class="col-2" style="border: 1px solid rgba(0,0,0,.125); display: none;" id="contact-card">
           <div style="border-bottom: 1px solid black; font-size: 20px; padding: 15px 0; margin-bottom: 20px;" id="contact-name">
-            Fayez Shahid
           </div>
           <div>
             <div>
@@ -130,6 +129,7 @@
             <!-- <div id="contact-info"> -->
               <button class="btn btn-secondary" id="addContactBtn" data-toggle="modal" data-target="#contactModal">Add details</button>
             <!-- </div> -->
+            <button style="position: absolute; bottom: 0; right: 0;" class="btn btn-primary" data-toggle="modal" data-target="#modal">Add Total Sales</button>
           </div>
         </div>
       </div>
@@ -365,6 +365,89 @@
         </div>
     </div>
   </div>
+  
+  <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+            <form id="form">
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="name">A.Name:</label>
+                        <input type="text" class="form-control" id="name" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date:</label>
+                        <input type="date" style="width: 100%;" class="form-control" id="date" name="date">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="clientName">Client Name:</label>
+                        <input type="text" class="form-control" id="clientName" name="clientName">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact">Contact:</label>
+                        <input type="tel" class="form-control" id="contact" name="contact">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="projectName">Project Name:</label>
+                        <input type="text" class="form-control" id="projectName" name="projectName">
+                    </div>
+                    <div class="form-group">
+                        <label for="product">Product:</label>
+                        <input type="text" class="form-control" id="product" name="product">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="received">Received:</label>
+                        <input type="text" class="form-control" id="received" name="received">
+                    </div>
+                    <div class="form-group">
+                        <label for="source">Source:</label>
+                        <input type="text" class="form-control" id="source" name="source">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group" style="width: 35%;">
+                        <label for="totalCost">Total Cost:</label>
+                        <input type="text" style="width: 90%;" class="form-control" id="totalCost" name="totalCost">
+                    </div>
+                    <div class="form-group" style="width: 30%;">
+                        <label for="upfront">Upfront:</label>
+                        <input type="text" style="width: 90%;" class="form-control" id="upfront" name="upfront">
+                    </div>
+                    <div class="form-group" style="width: 35%;">
+                        <label for="remaining">Remaining:</label>
+                        <input type="text" class="form-control" id="remaining" name="remaining">
+                    </div>
+                </div>
+                <div class="input-group justify-content-between">
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <input type="text" class="form-control" id="status" name="status">
+                    </div>
+                    <div class="form-group">
+                        <label for="remarks">Remarks:</label>
+                        <textarea id="remarks" class="form-control" name="remarks"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="addToTotalSale()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block scripts %}
@@ -399,7 +482,7 @@
       page_id = arr[0]
       access_token = arr[1]
       page_name = arr[2]
-      switchTab(page_id, access_token, 'all')
+      switchTab(page_id, access_token, 'fb')
       getIds()
       $('[data-toggle="tooltip"]').tooltip();
     })
@@ -424,6 +507,60 @@
       });
     }
     
+    function appendConversations(data){
+      for(var i=0; i<data.length; i++){
+        const currentDate = new Date();
+        const timestamp = new Date(data[i].timestamp);
+        // Calculate the time difference in milliseconds between the two dates
+        const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp);
+
+        // Calculate the number of days between the two dates
+        const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+        // console.log(daysDifference)
+        if (daysDifference < 1){
+          const options = {
+            // weekday: 'short',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+          };
+          formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp);
+        }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+          const options = {
+            weekday: 'short',
+            // hour: 'numeric',
+            // minute: 'numeric',
+            // hour12: true
+          };
+          formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp); // Output: Wed 6:14 PM
+        } else {
+          // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
+          formattedDate = new Intl.DateTimeFormat('en-US', {
+            // year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            // hour: 'numeric',
+            // minute: 'numeric',
+            // hour12: true
+          }).format(timestamp);
+        }
+
+        let lastMessage = data[i].last_message;
+        if(data[i].sender == page_id || data[i].sender == insta_id){
+          lastMessage = 'You: ' + lastMessage;
+        }
+        $('#chats').append(`
+          <div class="conversation ${data[i].timestamp > data[i].read_timestamp ? 'unread' : ''}" id="chat${data[i].id}">
+            <li class="list-group-item bot-bubble rounded-bubble" onclick="getMessages('${data[i].id}')">${data[i].name}
+            <span id="timestamp${data[i].id}" class="timestamp">${formattedDate}</span>  
+            <div class="last_message" id="last_message${data[i].id}">${lastMessage}</div>
+          </div>
+        `)
+        // console.log(name)
+        // console.log(page_id, insta_id)
+      }
+    }
+
     function getConversations(page_id, access_token, platform){
       $('#chats').html('');
 
@@ -432,67 +569,202 @@
         method: 'GET',
         async: 'false', // Assuming the response is JSON
         success: function(data) {
-          console.log(data)
-          for(var i=0; i<data.length; i++){
-            
-            const currentDate = new Date();
-            const timestamp = new Date(data[i].timestamp);
-            // Calculate the time difference in milliseconds between the two dates
-            const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp);
-
-            // Calculate the number of days between the two dates
-            const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-            // console.log(daysDifference)
-            if (daysDifference < 1){
-              const options = {
-                // weekday: 'short',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-              };
-              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp);
-            }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
-              const options = {
-                weekday: 'short',
-                // hour: 'numeric',
-                // minute: 'numeric',
-                // hour12: true
-              };
-              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp); // Output: Wed 6:14 PM
-            } else {
-              // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
-              formattedDate = new Intl.DateTimeFormat('en-US', {
-                // year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                // hour: 'numeric',
-                // minute: 'numeric',
-                // hour12: true
-              }).format(timestamp);
-            }
-
-            let lastMessage = data[i].last_message;
-            if(data[i].sender == page_id || data[i].sender == insta_id){
-              lastMessage = 'You: ' + lastMessage;
-            }
-            $('#chats').append(`
-              <div class="conversation ${data[i].timestamp > data[i].read_timestamp ? 'unread' : ''}" id="chat${data[i].id}">
-                <li class="list-group-item bot-bubble rounded-bubble" onclick="getMessages('${data[i].id}')">${data[i].name}
-                <span id="timestamp${data[i].id}" class="timestamp">${formattedDate}</span>  
-                <div class="last_message" id="last_message${data[i].id}">${lastMessage}</div>
-              </div>
-            `)
-            // console.log(name)
-            // console.log(page_id, insta_id)
+          page_url = data.pop()
+          // console.log(page_url)
+          appendConversations(data)
+          if(page_url){
+            getMoreConversations(page_url, platform)
           }
         },
       });
+    }
+
+    function getMoreConversations(page_url, platform){
+      $.get('/getMoreConversations', { page_url: page_url, platform: platform}, function(data){
+        // console.log('fayez')
+        page_url = data.pop()
+        console.log(data)
+        appendConversations(data)
+        if(page_url){
+          getMoreConversations(page_url, platform)
+        }
+      })
     }
 
     var current_recipient_id = 0;
     var current_conversation_id;
     var current_user_id;
     var current_user_name;
+
+    function appendMessages(data){
+      // console.log('fayez')
+      for(var i=0; i<data.length; i++){
+        if(i <= data.length - 2 && i > 0){
+          const timestamp1 = new Date(data[i-1].timestamp);
+          const timestamp2 = new Date(data[i].timestamp);
+
+          // const timestamp1 = new Date(t1.getTime() + (5 * 60 * 60 * 1000));
+          // const timestamp2 = new Date(t2.getTime() + (5 * 60 * 60 * 1000));
+
+          const timeDifferenceInMilliseconds = timestamp1 - timestamp2;
+          const timeDifferenceInMinutes = timeDifferenceInMilliseconds / (1000 * 60);
+          // console.log(timestamp1)
+          // console.log(timestamp2)
+          let formattedDate = '';
+
+          if (timeDifferenceInMinutes > 3) {
+            const currentDate = new Date();
+            // Calculate the time difference in milliseconds between the two dates
+            const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp1);
+
+            // Calculate the number of days between the two dates
+            const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+
+            if(daysDifference < 1){
+              const options = {
+                // weekday: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+              };
+              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1);
+            }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+              const options = {
+                weekday: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+              };
+              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1); // Output: Wed 6:14 PM
+            } else {
+              // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
+              formattedDate = new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+              }).format(timestamp1);
+            }
+
+            $('.chat-box').prepend(`
+              <div class="d-flex justify-content-center date">
+                ${formattedDate}
+              </div>
+            `);
+          }
+        }
+
+        if(data[i].from != page_id && data[i].from != insta_id){
+          current_recipient_id = data[i].from;
+          if(data[i].attachments.length > 0){
+            for (var j = 0; j < data[i].attachments.length; j++) {
+              var attachment = data[i].attachments[j];
+              var attachmentElement;
+              // console.log(attachment.type)
+              if (attachment.type.includes("image")) {
+                attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+              } 
+              else if (attachment.type.includes("video")) {
+                attachmentElement = `
+                  <div class="d-flex justify-content-between">
+                      <span>${attachment.name}</span>
+                      <a href="${attachment.url}" target="_blank" download>
+                          <i class="fas fa-download"></i>
+                      </a>
+                  </div>
+                `;
+              }
+              else if (attachment.type.includes("application")) {
+                attachmentElement = `
+                  <div class="d-flex justify-content-between">
+                      <span>${attachment.name}</span>
+                      <a href="${attachment.url}" target="_blank" download>
+                          <i class="fas fa-download"></i>
+                      </a>
+                  </div>
+                `;
+              }
+
+              $('.chat-box').prepend(`
+                  <div class='d-flex'>
+                      <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
+                      <div class="chat-message">
+                          <div class="chat-bubble-response">
+                              ${attachmentElement}
+                          </div>
+                      </div>
+                  </div>
+              `);
+            }
+          }
+          else{
+            $('.chat-box').prepend(`
+              <div class='d-flex'>
+                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
+                <div class="chat-message">
+                    <div class="chat-bubble-response">${data[i].message}</div>
+                </div>
+              </div>
+            `);
+          }
+        }
+        else{
+          if(data[i].attachments.length > 0){
+            for (var j = 0; j < data[i].attachments.length; j++) {
+              var attachment = data[i].attachments[j];
+              var attachmentElement;
+              // console.log(attachment.type)
+              if (attachment.type.includes("image")) {
+                attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+              } 
+              else if (attachment.type.includes("video")) {
+                attachmentElement = `
+                  <div class="d-flex justify-content-between">
+                      <span>${attachment.name}</span>
+                      <a href="${attachment.url}" target="_blank" download>
+                          <i class="fas fa-download"></i>
+                      </a>
+                  </div>
+                `;
+              }
+              else if (attachment.type.includes("application")) {
+                attachmentElement = `
+                  <div class="d-flex justify-content-between">
+                      <span>${attachment.name}</span>
+                      <a href="${attachment.url}" target="_blank" download>
+                          <i class="fas fa-download"></i>
+                      </a>
+                  </div>
+                `;
+              }
+
+              $('.chat-box').prepend(`
+                  <div class='d-flex flex-row-reverse'>
+                    <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
+                    <div class="chat-message">
+                        <div class="chat-bubble-send">
+                            ${attachmentElement}
+                        </div>
+                    </div>
+                  </div>
+              `);
+            }
+          }
+          else{
+            $('.chat-box').prepend(`
+              <div class='d-flex flex-row-reverse'>
+                <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
+                <div class="chat-message sent">
+                    <div class="chat-bubble-send">${data[i].message}</div>
+                </div>
+              </div>
+            `);
+          }
+        }
+      }
+    }
 
     function getMessages(id){
       // current_recipient_id = id;
@@ -509,11 +781,13 @@
       $('.chat-box').show();
 
       $.ajax({
-        url: '/getMessages/' + id,
+        url: '/getMessages/' + id + '/' + current_tab,
         method: 'GET',
         async: 'false', // Assuming the response is JSON
         success: function(data) {
-          console.log(data)
+          page_url = data.pop()
+          console.log(page_url)
+
           current_user_id = data[0].id;
           current_user_name = data[0].name;
           $('#contact-name').html(current_user_name)
@@ -575,176 +849,32 @@
           //   </div>
           // `);
           data = data[1]
-          for(var i=0; i<data.length; i++){
-            if(i <= data.length - 2 && i > 0){
-              const timestamp1 = new Date(data[i-1].timestamp);
-              const timestamp2 = new Date(data[i].timestamp);
 
-              // const timestamp1 = new Date(t1.getTime() + (5 * 60 * 60 * 1000));
-              // const timestamp2 = new Date(t2.getTime() + (5 * 60 * 60 * 1000));
-
-              const timeDifferenceInMilliseconds = timestamp1 - timestamp2;
-              const timeDifferenceInMinutes = timeDifferenceInMilliseconds / (1000 * 60);
-              // console.log(timestamp1)
-              // console.log(timestamp2)
-              let formattedDate = '';
-
-              if (timeDifferenceInMinutes > 3) {
-                const currentDate = new Date();
-                // Calculate the time difference in milliseconds between the two dates
-                const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp1);
-
-                // Calculate the number of days between the two dates
-                const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-
-                if(daysDifference < 1){
-                  const options = {
-                    // weekday: 'short',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true
-                  };
-                  formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1);
-                }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
-                  const options = {
-                    weekday: 'short',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true
-                  };
-                  formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1); // Output: Wed 6:14 PM
-                } else {
-                  // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
-                  formattedDate = new Intl.DateTimeFormat('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true
-                  }).format(timestamp1);
-                }
-
-                $('.chat-box').prepend(`
-                  <div class="d-flex justify-content-center date">
-                    ${formattedDate}
-                  </div>
-                `);
-              }
-            }
-
-            if(data[i].from != page_id && data[i].from != insta_id){
-              current_recipient_id = data[i].from;
-              if(data[i].attachments.length > 0){
-                for (var j = 0; j < data[i].attachments.length; j++) {
-                  var attachment = data[i].attachments[j];
-                  var attachmentElement;
-                  // console.log(attachment.type)
-                  if (attachment.type.includes("image")) {
-                    attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
-                  } 
-                  else if (attachment.type.includes("video")) {
-                    attachmentElement = `
-                      <div class="d-flex justify-content-between">
-                          <span>${attachment.name}</span>
-                          <a href="${attachment.url}" target="_blank" download>
-                              <i class="fas fa-download"></i>
-                          </a>
-                      </div>
-                    `;
-                  }
-                  else if (attachment.type.includes("application")) {
-                    attachmentElement = `
-                      <div class="d-flex justify-content-between">
-                          <span>${attachment.name}</span>
-                          <a href="${attachment.url}" target="_blank" download>
-                              <i class="fas fa-download"></i>
-                          </a>
-                      </div>
-                    `;
-                  }
-
-                  $('.chat-box').prepend(`
-                      <div class='d-flex'>
-                          <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
-                          <div class="chat-message">
-                              <div class="chat-bubble-response">
-                                  ${attachmentElement}
-                              </div>
-                          </div>
-                      </div>
-                  `);
-                }
-              }
-              else{
-                $('.chat-box').prepend(`
-                  <div class='d-flex'>
-                    <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
-                    <div class="chat-message">
-                        <div class="chat-bubble-response">${data[i].message}</div>
-                    </div>
-                  </div>
-                `);
-              }
-            }
-            else{
-              if(data[i].attachments.length > 0){
-                for (var j = 0; j < data[i].attachments.length; j++) {
-                  var attachment = data[i].attachments[j];
-                  var attachmentElement;
-                  // console.log(attachment.type)
-                  if (attachment.type.includes("image")) {
-                    attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
-                  } 
-                  else if (attachment.type.includes("video")) {
-                    attachmentElement = `
-                      <div class="d-flex justify-content-between">
-                          <span>${attachment.name}</span>
-                          <a href="${attachment.url}" target="_blank" download>
-                              <i class="fas fa-download"></i>
-                          </a>
-                      </div>
-                    `;
-                  }
-                  else if (attachment.type.includes("application")) {
-                    attachmentElement = `
-                      <div class="d-flex justify-content-between">
-                          <span>${attachment.name}</span>
-                          <a href="${attachment.url}" target="_blank" download>
-                              <i class="fas fa-download"></i>
-                          </a>
-                      </div>
-                    `;
-                  }
-
-                  $('.chat-box').prepend(`
-                      <div class='d-flex flex-row-reverse'>
-                        <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
-                        <div class="chat-message">
-                            <div class="chat-bubble-send">
-                                ${attachmentElement}
-                            </div>
-                        </div>
-                      </div>
-                  `);
-                }
-              }
-              else{
-                $('.chat-box').prepend(`
-                  <div class='d-flex flex-row-reverse'>
-                    <input type="radio" name="radio" onclick="allowToEnterChatModal('${id}', '${data[i].timestamp}')">
-                    <div class="chat-message sent">
-                        <div class="chat-bubble-send">${data[i].message}</div>
-                    </div>
-                  </div>
-                `);
-              }
-            }
-          }
+          appendMessages(data)
           var element = document.querySelector(".chat-box");
           element.scrollTop = element.scrollHeight;
+
+          if(page_url){
+            getMoreMessages(page_url)
+          }
+
         },
       });
+    }
+
+    function getMoreMessages(page_url){
+      $.get('/getMoreMessages', { page_url: page_url, platform: current_tab, conversation_id: current_conversation_id}, function(data){
+        // console.log('fayez')
+        page_url = data.pop()
+        data = data[0]
+        console.log(data)
+        appendMessages(data)
+        var element = document.querySelector(".chat-box");
+        element.scrollTop = element.scrollHeight;
+        if(page_url){
+          getMoreMessages(page_url)
+        }
+      })
     }
 
     function search(value){
@@ -1254,7 +1384,7 @@
     }
 
     // Set up a timer to check for messages every 3 seconds
-    setInterval(checkForMessage, 3000);
+    setInterval(checkForMessage, 1000);
 
     var current_tab = 'all';
 
@@ -1419,6 +1549,32 @@
       access_token = selectedArray[1];
       page_name = $('#changePage option:selected').text();
       switchTab(page_id, access_token, current_tab)
+    }
+
+    function addToTotalSale(){
+        //fetch data from form
+        var form = document.getElementById('form');            
+        $.ajax({
+            url: '/addSale',
+            type: 'POST',
+            data: new FormData(form),
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                $('#modal').modal('hide')
+                toastr.success('Sale Added');
+                $('#form').trigger("reset");
+                // Get the current date in the format "YYYY-MM-DD"
+                const today = new Date().toISOString().split('T')[0];
+                // Set the default value of the date input to today's date
+                document.getElementById('date').value = today;
+                $('#sheets').val('Total Sales')
+                // loadSheetData('Total Sales');
+            },
+            error: function(error) {
+                toastr.error(error);
+            }
+        });
     }
 
 </script>

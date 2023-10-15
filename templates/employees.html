@@ -31,7 +31,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="role">Pages:</label>
-                                    <select style="width: 100% !important;" class="form-control js-example-basic-multiple" id="pages" name="pages[]" multiple="multiple">
+                                    <select style="width: 100% !important;" class="form-control js-example-basic-multiple" id="allot-pages" name="pages[]" multiple="multiple">
                                         <!-- <option value="1">Admin</option>
                                         <option value="2">Sales</option>
                                         <option value="3">Operation</option>
@@ -72,7 +72,7 @@
         var page_ids, page_names;
         $(document).ready(function() {
             
-            var allOptions = $("#pages").find("option");
+            var allOptions = $("#allot-pages").find("option");
     
             page_ids = allOptions.map(function() {
                 return parseInt($(this).val());
