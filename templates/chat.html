@@ -34,9 +34,9 @@
     </div> -->
     {% endif %}
     <div class="row">
-        <div class="col-3" style="padding: 0;">
+        <div class="col-3" style="padding: 0;" id="conversation-window">
           <div class="card">
-            <div style="height: 75vh; padding: 0" class="card-body">
+            <div style="height: 85vh; padding: 0" class="card-body">
                 <!-- <div class="d-flex justify-content-between align-items-center">
                   <h5>Previous Chats</h5>
                   <button type="button" class="btn btn-outline-primary" style="margin-bottom: 10px;" onclick="newChat()">+ New Chat</button>
@@ -82,10 +82,9 @@
         </div>
         <div class="col-7" style="padding: 0;">
           <div class="card">
-            <div style="height: 75vh" class="card-body">
-              <div class="chat-header">
-              </div>
-              <div class="chat-box" style="display: none;">
+            <div style="height: 85vh" class="card-body" id="chatting-window">
+              <!-- <div class="chat-header"></div> -->
+              <!-- <div class="chat-box" style="display: none;"> -->
                 <!-- <div class="chat-message">
                     <div class="chat-bubble">Hi, how can I help you?</div>
                 </div>
@@ -95,14 +94,14 @@
                 <div class="chat-message">
                     <div class="chat-bubble">How old are you?</div>
                 </div> -->
-              </div>
+              <!-- </div> -->
               <form id="messagingBar" style="display: none;" onsubmit="return false;">
                 <div class="message-box d-flex" >
-                  <input type="text" id="message" placeholder="Type your message..." onkeypress="sendMessage(event)">
+                  <textarea type="text" id="message" style="max-height: 90px;" placeholder="Type your message..." onkeypress="sendMessage(event)"></textarea>
                   <!-- <button type="button" class="btn btn-outline-warning" style="margin-left: 5px;" onclick="triggerFileInput()">Attachment</button> -->
                   <div class="message-icons">
                     <i class="fa-solid fa-paperclip" onclick="triggerFileInput()"></i>
-                    <input type="file" id="attachmentInput" style="display: none;" onchange="attach(event)">
+                    <input type="file" id="attachmentInput" style="display: none;" onchange="attach(event.target.files)" multiple>
                     <!-- <button type="button" class="btn btn-outline-primary" style="margin-left: 5px;" onclick="sendMessage()">Send</button> -->
                     <i class="fa-regular fa-message"></i>
                     <!-- <p class="emoji-picker-container">
@@ -116,9 +115,8 @@
             </div>
           </div>
         </div>
-        <div class="col-2" style="border: 1px solid rgba(0,0,0,.125); display: none;" id="contact-card">
-          <div style="border-bottom: 1px solid black; font-size: 20px; padding: 15px 0; margin-bottom: 20px;" id="contact-name">
-          </div>
+        <!-- <div class="col-2" style="border: 1px solid rgba(0,0,0,.125); display: none;" id="contact-card"> -->
+          <!-- <div style="border-bottom: 1px solid black; font-size: 20px; padding: 15px 0; margin-bottom: 20px;" id="contact-name"></div>
           <div>
             <div>
               <b>About</b>
@@ -126,12 +124,9 @@
             <div id="contact-info">
               <p style="color: gray;">Add details about people, like contact information</p>
             </div>
-            <!-- <div id="contact-info"> -->
-              <button class="btn btn-secondary" id="addContactBtn" data-toggle="modal" data-target="#contactModal">Add details</button>
-            <!-- </div> -->
-            <button style="position: absolute; bottom: 0; right: 0;" class="btn btn-primary" data-toggle="modal" data-target="#modal">Add Total Sales</button>
-          </div>
-        </div>
+            <button class="btn btn-secondary" id="addContactBtn" data-toggle="modal" data-target="#contactModal">Add details</button>
+          </div> -->
+        <!-- </div> -->
       </div>
     </div>
     <!-- <div class="container">
@@ -365,89 +360,17 @@
         </div>
     </div>
   </div>
-  
-  <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-body">
-            <form id="form">
-                <div class="input-group justify-content-between">
-                    <div class="form-group">
-                        <label for="name">A.Name:</label>
-                        <input type="text" class="form-control" id="name" name="name">
-                    </div>
-                    <div class="form-group">
-                        <label for="date">Date:</label>
-                        <input type="date" style="width: 100%;" class="form-control" id="date" name="date">
-                    </div>
-                </div>
-                <div class="input-group justify-content-between">
-                    <div class="form-group">
-                        <label for="clientName">Client Name:</label>
-                        <input type="text" class="form-control" id="clientName" name="clientName">
-                    </div>
-                    <div class="form-group">
-                        <label for="contact">Contact:</label>
-                        <input type="tel" class="form-control" id="contact" name="contact">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" class="form-control" id="email" name="email">
-                </div>
-                <div class="input-group justify-content-between">
-                    <div class="form-group">
-                        <label for="projectName">Project Name:</label>
-                        <input type="text" class="form-control" id="projectName" name="projectName">
-                    </div>
-                    <div class="form-group">
-                        <label for="product">Product:</label>
-                        <input type="text" class="form-control" id="product" name="product">
-                    </div>
-                </div>
-                <div class="input-group justify-content-between">
-                    <div class="form-group">
-                        <label for="received">Received:</label>
-                        <input type="text" class="form-control" id="received" name="received">
-                    </div>
-                    <div class="form-group">
-                        <label for="source">Source:</label>
-                        <input type="text" class="form-control" id="source" name="source">
-                    </div>
-                </div>
-                <div class="input-group justify-content-between">
-                    <div class="form-group" style="width: 35%;">
-                        <label for="totalCost">Total Cost:</label>
-                        <input type="text" style="width: 90%;" class="form-control" id="totalCost" name="totalCost">
-                    </div>
-                    <div class="form-group" style="width: 30%;">
-                        <label for="upfront">Upfront:</label>
-                        <input type="text" style="width: 90%;" class="form-control" id="upfront" name="upfront">
-                    </div>
-                    <div class="form-group" style="width: 35%;">
-                        <label for="remaining">Remaining:</label>
-                        <input type="text" class="form-control" id="remaining" name="remaining">
-                    </div>
-                </div>
-                <div class="input-group justify-content-between">
-                    <div class="form-group">
-                        <label for="status">Status:</label>
-                        <input type="text" class="form-control" id="status" name="status">
-                    </div>
-                    <div class="form-group">
-                        <label for="remarks">Remarks:</label>
-                        <textarea id="remarks" class="form-control" name="remarks"></textarea>
-                    </div>
-                </div>
-            </form>
+
+  <div class="modal" id="previewImageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="max-width: 1000px;">
+        <div class="modal-content" style="background-color: unset; text-align: center;">
+            <div class="modal-body">
+              <img src="" alt="">
+            </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="addToTotalSale()">Add</button>
-        </div>
-      </div>
     </div>
   </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -458,6 +381,18 @@
       // $('#')onkeypress="sendMessage(event)"
       $('#message').emojioneArea({
         events: {
+          ready: function() {
+              // This callback is triggered when the EmojioneArea is ready.
+              // You can now access and manipulate the .emojionearea element.
+              $('.emojionearea').css({
+                'max-height': '80px',
+                'overflow': 'hidden'
+              });
+              $('.emojionearea-editor').css({
+                'min-height': '80px',
+                'max-height': 'inherit'
+              });
+            },
             keyup: function (editor, event) {
                 // Check if the pressed key is the Enter key (key code 13)
                 // if (event.which === 13) {
@@ -467,6 +402,7 @@
             }
         }
       })
+      
       // $('.emojionearea-editor').click(function(event){
       //   sendMessage(event)
       // })
@@ -483,7 +419,7 @@
       access_token = arr[1]
       page_name = arr[2]
       switchTab(page_id, access_token, 'fb')
-      getIds()
+      // getIds()
       $('[data-toggle="tooltip"]').tooltip();
     })
 
@@ -491,21 +427,21 @@
       switchTab(page_id, access_token, platform)
     }
 
-    function getIds(){
-      $.ajax({
-        url: '/getIds',
-        type: 'GET',
-        async: false,
-        success: function(data) {
-          // console.log(data);
-          // page_id = data['page_id'];
-          insta_id = data['insta_id'];
-        },
-        error: function() {
-          console.log('Error fetching IDs');
-        }
-      });
-    }
+    // function getIds(){
+    //   $.ajax({
+    //     url: '/getIds',
+    //     type: 'GET',
+    //     async: false,
+    //     success: function(data) {
+    //       // console.log(data);
+    //       // page_id = data['page_id'];
+    //       insta_id = data['insta_id'];
+    //     },
+    //     error: function() {
+    //       console.log('Error fetching IDs');
+    //     }
+    //   });
+    // }
     
     function appendConversations(data){
       for(var i=0; i<data.length; i++){
@@ -551,11 +487,34 @@
         }
         $('#chats').append(`
           <div class="conversation ${data[i].timestamp > data[i].read_timestamp ? 'unread' : ''}" id="chat${data[i].id}">
-            <li class="list-group-item bot-bubble rounded-bubble" onclick="getMessages('${data[i].id}')">${data[i].name}
+            <li class="list-group-item bot-bubble rounded-bubble" onclick="getMessages('${data[i].id}', '${data[i].recipient_id}')">${data[i].name}
             <span id="timestamp${data[i].id}" class="timestamp">${formattedDate}</span>  
             <div class="last_message" id="last_message${data[i].id}">${lastMessage}</div>
           </div>
         `)
+
+        // Select the first div under the element with ID "parent"
+        // var firstDiv = $("#chatting-window > div:first");
+
+        // Append something after the first div
+        $("#chatting-window").prepend(`<div class="chat-box" id="chat-box-${data[i].id}" style="display: none;"></div>`);
+        $("#chatting-window").prepend(`<div class="chat-header" id="chat-header-${data[i].id}"></div>`)
+
+        $('.row').append(`
+          <div class="col-2" style="border: 1px solid rgba(0,0,0,.125); display: none;" id="contact-card-${data[i].id}">
+            <div style="border-bottom: 1px solid black; font-size: 20px; padding: 15px 0; margin-bottom: 20px;" id="contact-name-${data[i].id}"></div>
+            <div>
+              <div>
+                <b>About</b>
+              </div>
+              <div id="contact-info-${data[i].id}">
+                <p style="color: gray;">Add details about people, like contact information</p>
+              </div>
+              <button class="btn btn-secondary" id="addContactBtn-${data[i].id}" data-toggle="modal" data-target="#contactModal">Add details</button>
+            </div>
+          </div>
+        `)
+
         // console.log(name)
         // console.log(page_id, insta_id)
       }
@@ -570,7 +529,7 @@
         async: 'false', // Assuming the response is JSON
         success: function(data) {
           page_url = data.pop()
-          // console.log(page_url)
+          // console.log(data)
           appendConversations(data)
           if(page_url){
             getMoreConversations(page_url, platform)
@@ -583,7 +542,7 @@
       $.get('/getMoreConversations', { page_url: page_url, platform: platform}, function(data){
         // console.log('fayez')
         page_url = data.pop()
-        console.log(data)
+        // console.log(data)
         appendConversations(data)
         if(page_url){
           getMoreConversations(page_url, platform)
@@ -591,12 +550,12 @@
       })
     }
 
-    var current_recipient_id = 0;
+    var current_recipient_id;
     var current_conversation_id;
     var current_user_id;
     var current_user_name;
 
-    function appendMessages(data){
+    function appendMessages(data, id){
       // console.log('fayez')
       for(var i=0; i<data.length; i++){
         if(i <= data.length - 2 && i > 0){
@@ -606,65 +565,37 @@
           // const timestamp1 = new Date(t1.getTime() + (5 * 60 * 60 * 1000));
           // const timestamp2 = new Date(t2.getTime() + (5 * 60 * 60 * 1000));
 
-          const timeDifferenceInMilliseconds = timestamp1 - timestamp2;
-          const timeDifferenceInMinutes = timeDifferenceInMilliseconds / (1000 * 60);
-          // console.log(timestamp1)
-          // console.log(timestamp2)
-          let formattedDate = '';
-
-          if (timeDifferenceInMinutes > 3) {
-            const currentDate = new Date();
-            // Calculate the time difference in milliseconds between the two dates
-            const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp1);
-
-            // Calculate the number of days between the two dates
-            const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-
-            if(daysDifference < 1){
-              const options = {
-                // weekday: 'short',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-              };
-              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1);
-            }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
-              const options = {
-                weekday: 'short',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-              };
-              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1); // Output: Wed 6:14 PM
-            } else {
-              // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
-              formattedDate = new Intl.DateTimeFormat('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-              }).format(timestamp1);
-            }
-
-            $('.chat-box').prepend(`
-              <div class="d-flex justify-content-center date">
-                ${formattedDate}
+          var formattedDate = getFormattedDate(timestamp1, timestamp2);
+          if(formattedDate){
+            $('#chat-box-' + id).prepend(`
+              <div class="d-flex justify-content-center">
+                <div class="chat-date">
+                  ${formattedDate}
+                </div>
               </div>
             `);
           }
         }
 
         if(data[i].from != page_id && data[i].from != insta_id){
-          current_recipient_id = data[i].from;
+          // current_recipient_id = data[i].from;
           if(data[i].attachments.length > 0){
             for (var j = 0; j < data[i].attachments.length; j++) {
               var attachment = data[i].attachments[j];
               var attachmentElement;
+
+              // var formattedDateOfMessage = new Intl.DateTimeFormat('en-US', {
+              //   year: 'numeric',
+              //   month: 'short',
+              //   day: 'numeric',
+              //   hour: 'numeric',
+              //   minute: 'numeric',
+              //   hour12: true
+              // }).format(new Date(data[i].timestamp));
+
               // console.log(attachment.type)
               if (attachment.type.includes("image")) {
-                attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+                attachmentElement = `<img onclick="previewImage('${attachment.url}')" src="${attachment.url}" alt="Sent Image">`;
               } 
               else if (attachment.type.includes("video")) {
                 attachmentElement = `
@@ -687,11 +618,11 @@
                 `;
               }
 
-              $('.chat-box').prepend(`
+              $('#chat-box-' + id).prepend(`
                   <div class='d-flex'>
                       <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
                       <div class="chat-message">
-                          <div class="chat-bubble-response">
+                          <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(data[i].timestamp)}" class="chat-bubble-response">
                               ${attachmentElement}
                           </div>
                       </div>
@@ -700,11 +631,13 @@
             }
           }
           else{
-            $('.chat-box').prepend(`
+            $('#chat-box-' + id).prepend(`
               <div class='d-flex'>
                 <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
                 <div class="chat-message">
-                    <div class="chat-bubble-response">${data[i].message}</div>
+                    <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(data[i].timestamp)}" class="chat-bubble-response">
+                      ${data[i].message.replace(/\n$/, '').replace(/\n/g, '<br>')}
+                    </div>
                 </div>
               </div>
             `);
@@ -715,9 +648,19 @@
             for (var j = 0; j < data[i].attachments.length; j++) {
               var attachment = data[i].attachments[j];
               var attachmentElement;
+
+              // var formattedDateOfMessage = new Intl.DateTimeFormat('en-US', {
+              //   year: 'numeric',
+              //   month: 'short',
+              //   day: 'numeric',
+              //   hour: 'numeric',
+              //   minute: 'numeric',
+              //   hour12: true
+              // }).format(new Date(data[i].timestamp));
+
               // console.log(attachment.type)
               if (attachment.type.includes("image")) {
-                attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
+                attachmentElement = `<img onclick="previewImage('${attachment.url}')" src="${attachment.url}" alt="Sent Image">`;
               } 
               else if (attachment.type.includes("video")) {
                 attachmentElement = `
@@ -740,11 +683,11 @@
                 `;
               }
 
-              $('.chat-box').prepend(`
+              $('#chat-box-' + id).prepend(`
                   <div class='d-flex flex-row-reverse'>
                     <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
                     <div class="chat-message">
-                        <div class="chat-bubble-send">
+                        <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(data[i].timestamp)}" class="chat-bubble-send">
                             ${attachmentElement}
                         </div>
                     </div>
@@ -753,11 +696,13 @@
             }
           }
           else{
-            $('.chat-box').prepend(`
+            $('#chat-box-' + id).prepend(`
               <div class='d-flex flex-row-reverse'>
                 <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data[i].timestamp}')">
                 <div class="chat-message sent">
-                    <div class="chat-bubble-send">${data[i].message}</div>
+                    <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(data[i].timestamp)}" class="chat-bubble-send">
+                      ${data[i].message.replace(/\n$/, '').replace(/\n/g, '<br>')}
+                    </div>
                 </div>
               </div>
             `);
@@ -766,22 +711,117 @@
       }
     }
 
-    function getMessages(id){
-      // current_recipient_id = id;
+    function getFormattedDate(timestamp1, timestamp2){
+      const timeDifferenceInMilliseconds = timestamp1 - timestamp2;
+      const timeDifferenceInMinutes = timeDifferenceInMilliseconds / (1000 * 60);
+      // console.log(timestamp1)
+      // console.log(timestamp2)
+      // console.log(timeDifferenceInMinutes)
+
+      let formattedDate = '';
+      console.log(timeDifferenceInMinutes)
+      if (timeDifferenceInMinutes > 3) {
+        
+        const currentDate = new Date();
+        // Calculate the time difference in milliseconds between the two dates
+        const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp1);
+
+        // Calculate the number of days between the two dates
+        const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+        
+        if(daysDifference < 1){
+          const options = {
+            // weekday: 'short',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+          };
+          formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1);
+        }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
+          const options = {
+            weekday: 'short',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+          };
+          formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp1); // Output: Wed 6:14 PM
+        } else {
+          // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
+          formattedDate = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+          }).format(timestamp1);
+        }
+      }
+      return formattedDate;
+    }
+
+    function conversationUpAnimation(conversation_id){
+      var conversationElement = $("#chat" + conversation_id);
+      var chatsContainer = $("#chats");
+
+      // Check if the conversation is already at the top
+      if (!conversationElement.is(chatsContainer.children().first())) {
+        // Add the class to trigger the animation
+        conversationElement.addClass("new-message");
+
+        // Move the conversation element to the top of the list
+        chatsContainer.prepend(conversationElement);
+
+        // Remove the class after the animation is complete
+        setTimeout(function() {
+            conversationElement.removeClass("new-message");
+        }, 500); // 500ms should match the animation duration
+      }
+    }
+
+    function getFormattedDateForMessage(timestamp){
+      var formattedDateOfMessage = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+      }).format(new Date(timestamp));
+
+      return formattedDateOfMessage;
+    }
+
+    function previewImage(image){
+      console.log(image)
+      $('#previewImageModal').modal('show')
+      $('#previewImageModal img').attr('src', image)
+    }
+
+    function getMessages(id, recipient_id){
+      current_recipient_id = recipient_id;
       $('.conversation').removeClass('selected');
       // Add 'selected' class to the clicked conversation
       $('#chat' + id).addClass('selected');
       $('#chat' + id).removeClass('unread');
       // console.log($(this))
+      $('#chat-header-' + current_conversation_id).hide();
+      $('#chat-box-' + current_conversation_id).hide();
+      $('#contact-card-' + current_conversation_id).hide();
       current_conversation_id = id;
-      console.log(id);
-      $('.chat-box').html('');
-      $('.chat-header').html('');
-      $('#messagingBar').show()
-      $('.chat-box').show();
+      // console.log(id);
+      // $('#chat-box-' + id).html('');
+      // $('.chat-header').html('');
+      $('#messagingBar').show();
+      $('#chat-header-' + id).show();
+      $('#chat-box-' + id).show();
+      $('#contact-card-' + id).show();
+
+      if($('#chat-box-' + id).html())
+        return
 
       $.ajax({
-        url: '/getMessages/' + id + '/' + current_tab,
+        url: '/getMessages/' + id + '/' + access_token + '/' + current_tab,
         method: 'GET',
         async: 'false', // Assuming the response is JSON
         success: function(data) {
@@ -790,10 +830,10 @@
 
           current_user_id = data[0].id;
           current_user_name = data[0].name;
-          $('#contact-name').html(current_user_name)
+          $('#contact-name-' + id).html(current_user_name)
           // console.log(data[2])
           if(data[2]){
-            $('#contact-info').html(`
+            $('#contact-info-' + id).html(`
               <div class="contact-details">
                 <div class="d-flex justify-content-between">
                   <p>Added Details</p>
@@ -805,7 +845,7 @@
                 <p><b>Address: </b>${data[2].address}</p>
               </div>
             `)
-            $('#addContactBtn').hide()
+            $('#addContactBtn-' + id).hide()
             // $("#editContactForm input[name='phone']").val(data[2].phone);
             // $("#editContactForm input[name='email']").val(data[2].email);
             // $("#editContactForm select[name='month']").val(data[2].month);
@@ -816,10 +856,9 @@
             // $("#editContactForm input[name='postalCode']").val(data[2].postalCode);
           }
           else{
-            $('#contact-info').html(`<p style="color: gray;">Add details about people, like contact information</p>`)
-            $('#addContactBtn').show()
+            $('#contact-info-' + id).html(`<p style="color: gray;">Add details about people, like contact information</p>`)
+            $('#addContactBtn-' + id).show()
           }
-          $('#contact-card').show()
           // console.log(current_user_id)
           // console.log(current_user_name)
 
@@ -837,7 +876,7 @@
           //   </div>
           // `);
 
-          $('.chat-header').html(`
+          $('#chat-header-' + id).html(`
             <div class="d-flex justify-content-between" style="margin-bottom: 10px">
               <h5 id="chatName">${current_user_name}</h5>
             </div>
@@ -849,30 +888,31 @@
           //   </div>
           // `);
           data = data[1]
-
-          appendMessages(data)
-          var element = document.querySelector(".chat-box");
+          // console.log(data)
+          appendMessages(data, id)
+          var element = document.querySelector("#chat-box-" + id);
           element.scrollTop = element.scrollHeight;
 
           if(page_url){
-            getMoreMessages(page_url)
+            getMoreMessages(page_url, id)
           }
 
         },
       });
     }
 
-    function getMoreMessages(page_url){
+    function getMoreMessages(page_url, id){
       $.get('/getMoreMessages', { page_url: page_url, platform: current_tab, conversation_id: current_conversation_id}, function(data){
         // console.log('fayez')
+        // console.log(data)
         page_url = data.pop()
         data = data[0]
-        console.log(data)
-        appendMessages(data)
-        var element = document.querySelector(".chat-box");
-        element.scrollTop = element.scrollHeight;
+        // console.log(id)
+        appendMessages(data, id)
+        // var element = document.querySelector(".chat-box");
+        // element.scrollTop = element.scrollHeight;
         if(page_url){
-          getMoreMessages(page_url)
+          getMoreMessages(page_url, id)
         }
       })
     }
@@ -959,52 +999,52 @@
       document.getElementById('attachmentInput').click();
     }
 
-    function attach(event) {
+    function attach(files, resent = false) {
       
-      const fileInput = event.target;
-      const file = fileInput.files[0];
-      
+      // if(file){
+      //   const files = file
+      // }
+      // else{
+      //   const fileInput = event.target;
+      //   const files = fileInput.files;
+      // }
+      // console.log(file.type)
       // console.log('File attached');
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('recipient_id', current_recipient_id);
-      formData.append('platform', current_tab)
+      // const files = file ? file : event.target.files;
+      console.log(files)
+      if(files.length === 0){
+        console.log(123)
+        return
+      }
 
-      $.ajax({
-        url: '/sendAttachment',
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false
-      })
-      .done(function(data) {
-        console.log(data)
+      for(let i = 0; i < files.length; i++){
+        const file = files[i];
         const reader = new FileReader();
         var chatBubble;
         reader.onload = function(event) {
-          if(data.type.includes("image")){
+          if(file.type.includes("image")){
             const imageUrl = event.target.result;
             chatBubble = `
               <div class='d-flex flex-row-reverse'>
                 <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '123')">
                 <div class="chat-message sent">
-                    <div class="chat-bubble-send">
+                    <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(new Date())}" class="chat-bubble-send">
                         <img src="${imageUrl}" alt="Sent Image">
                     </div>
                 </div>
               </div>
             `;
           }
-          else if(data.type.includes("video")){
+          else if(file.type.includes("video")){
             chatBubble = `
               <div class='d-flex flex-row-reverse'>
                 <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '123')">
                 <div class="chat-message sent">
-                    <div class="chat-bubble-send">
+                    <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(new Date())}" class="chat-bubble-send">
                         <div class="d-flex justify-content-between">
-                            <span>${data.name}</span>
-                            <a href="${data.url}" target="_blank" download>
+                            <span>${file.name}</span>
+                            <a href="" target="_blank" download>
                                 <i class="fas fa-download"></i>
                             </a>
                         </div>
@@ -1013,15 +1053,15 @@
               </div>
             `;
           }
-          else if(data.type.includes("application")){
+          else if(file.name.split('.')[1] == 'rar' || file.name.split('.')[1] == 'zip'){
             chatBubble = `
               <div class='d-flex flex-row-reverse'>
                 <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '123')">
                 <div class="chat-message sent">
-                    <div class="chat-bubble-send">
+                    <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(new Date())}" class="chat-bubble-send">
                         <div class="d-flex justify-content-between">
-                            <span>${data.name}</span>
-                            <a href="${data.url}" target="_blank" download>
+                            <span>${file.name}</span>
+                            <a href="" target="_blank" download>
                                 <i class="fas fa-download"></i>
                             </a>
                         </div>
@@ -1030,71 +1070,139 @@
               </div>
             `;
           }
+ 
+          const timestamp1 = new Date();
+          const timestamp2 = new Date($('.chat-box .chat-bubble-response, .chat-box .chat-bubble-send').last().attr('title'));
+          
+          if(!resent){
+            var formattedDate = getFormattedDate(timestamp1, timestamp2);
+            if(formattedDate){
+              $('#chat-box-' + current_conversation_id).append(`
+                <div class="d-flex justify-content-center">
+                  <div class="chat-date">
+                    ${formattedDate}
+                  </div>
+                </div>
+              `);
+            }
+          }          
 
-          var conversationElement = $("#chat" + current_conversation_id);
-          var chatsContainer = $("#chats");
-
-          // Check if the conversation is already at the top
-          if (!conversationElement.is(chatsContainer.children().first())) {
-            // Add the class to trigger the animation
-            conversationElement.addClass("new-message");
-
-            // Move the conversation element to the top of the list
-            chatsContainer.prepend(conversationElement);
-
-            // Remove the class after the animation is complete
-            setTimeout(function() {
-                conversationElement.removeClass("new-message");
-            }, 500); // 500ms should match the animation duration
-          }
-
-          $('.chat-box').append(chatBubble);
-          $('#last_message' + current_conversation_id).text('You: Attachment');
-          var element = document.querySelector(".chat-box");
+          $('#chat-box-' + current_conversation_id).append(chatBubble);
+          var element = document.querySelector("#chat-box-" + current_conversation_id);
           element.scrollTop = element.scrollHeight;
         };
         reader.readAsDataURL(file);
-      })
+      }
+
+      for(let i = 0; i < files.length; i++){
+        const file = files[i];
+        // console.log(i)
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('recipient_id', current_recipient_id);
+        formData.append('platform', current_tab)
+        formData.append('page_id', page_id)
+        formData.append('page_access_token', access_token)
+
+        $.ajax({
+          url: '/sendAttachment',
+          method: 'POST',
+          data: formData,
+          // async: false,
+          processData: false,
+          contentType: false,
+          success: function(data) {
+            console.log(data)
+            $('.chat-bubble-send').last().find('a').attr('href', data.url)
+            $('#last_message' + current_conversation_id).text('You: Attachment');
+            conversationUpAnimation(current_conversation_id);
+          },
+          error: function(){
+            console.log("Error")
+            // Get the last '.chat-box' div
+            var chatBoxDivs = document.querySelectorAll('#chat-box-' + current_conversation_id);
+            // console.log(chatBoxDivs)
+            // console.log(chatBoxDivs[0].children)
+            var lastChatBoxDiv = chatBoxDivs[0].children[chatBoxDivs[0].children.length - 1 - i];
+            
+            // Create a new span element
+            var element = document.createElement('i');
+            // var spanElement = "<span style='color: red;'>Failed to send message. Click to send again.</span>";
+            // element.textContent = 'Failed to send message. Click to send again.';
+            element.classList.add('fa-solid')
+            element.classList.add('fa-rotate-right')
+            element.classList.add('message-sent-failed');
+
+            // Append the span element to the inner div
+            lastChatBoxDiv.style.alignItems = "center";
+            lastChatBoxDiv.setAttribute("data-toggle", "tooltip");
+            lastChatBoxDiv.setAttribute("data-placement", "top");
+            lastChatBoxDiv.setAttribute("title", "Failed to send message. Click to send again.");
+            lastChatBoxDiv.onclick = function() {
+              lastChatBoxDiv.remove();
+              const fileList = new DataTransfer();
+              fileList.items.add(file);
+              attach(fileList.files, true);
+            };
+            lastChatBoxDiv.appendChild(element);
+          }
+        })
+      }
     }
 
-    function sendMessage(event, message = null){
+    function sendMessage(event, message = null, resent = false){
       if (event.keyCode != 13 && event.which != 13 && event.button != 0){
         return;
       }
 
+      if (event.key === 'Enter' && event.shiftKey) {
+        return
+      }
+      
       // if(message == null)
       //   var message = $('#message').val();
 
       $("#message")[0].emojioneArea.setText('');
+
+      const timestamp1 = new Date();
+      const timestamp2 = new Date($('.chat-box .chat-bubble-response, .chat-box .chat-bubble-send').last().attr('title'));
       
-      var conversationElement = $("#chat" + current_conversation_id);
-      var chatsContainer = $("#chats");
+      if(!resent){
+        // const timestamp1 = new Date(t1.getTime() + (5 * 60 * 60 * 1000));
+        // const timestamp2 = new Date(t2.getTime() + (5 * 60 * 60 * 1000));
 
-      // Check if the conversation is already at the top
-      if (!conversationElement.is(chatsContainer.children().first())) {
-        // Add the class to trigger the animation
-        conversationElement.addClass("new-message");
-
-        // Move the conversation element to the top of the list
-        chatsContainer.prepend(conversationElement);
-
-        // Remove the class after the animation is complete
-        setTimeout(function() {
-            conversationElement.removeClass("new-message");
-        }, 500); // 500ms should match the animation duration
+        var formattedDate = getFormattedDate(timestamp1, timestamp2);
+        if(formattedDate){
+          $('#chat-box-' + current_conversation_id).append(`
+            <div class="d-flex justify-content-center">
+              <div class="chat-date">
+                ${formattedDate}
+              </div>
+            </div>
+          `);
+        }
       }
+      // var formattedDateOfMessage = new Intl.DateTimeFormat('en-US', {
+      //   year: 'numeric',
+      //   month: 'short',
+      //   day: 'numeric',
+      //   hour: 'numeric',
+      //   minute: 'numeric',
+      //   hour12: true
+      // }).format(new Date(timestamp1));
 
-      $('.chat-box').append(`
+      $('#chat-box-' + current_conversation_id).append(`
         <div class='d-flex flex-row-reverse'>
           <input type="radio" name="radio" onclick="">
           <div class="chat-message sent">
-              <div class="chat-bubble-send">${message}</div>
+              <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(timestamp1)}" class="chat-bubble-send">
+                ${message.replace(/\n$/, '').replace(/\n/g, '<br>')}
+              </div>
           </div>
         </div>
       `);
       // $('#message').val('');
-      $('#last_message' + current_conversation_id).text('You: ' + message);
-      var element = document.querySelector(".chat-box");
+      var element = document.querySelector("#chat-box-" + current_conversation_id);
       element.scrollTop = element.scrollHeight;
 
       // $.post('/sendMessage', {'message': message, 'recipient_id': current_recipient_id, 'platform': current_tab}, function(data) {
@@ -1106,16 +1214,18 @@
       $.ajax({
         url: '/sendMessage',
         method: 'POST',
-        data: {'message': message, 'recipient_id': current_recipient_id, 'platform': current_tab},
+        data: {'message': message, 'recipient_id': current_recipient_id, 'page_id': page_id, 'page_access_token': access_token, 'platform': current_tab},
         success: function(data) {
           console.log(data)
+          $('#last_message' + current_conversation_id).text('You: ' + message);
+          conversationUpAnimation(current_conversation_id);
         },
         error: function(){
           console.log('Error')
           // Get the last '.chat-box' div
-          var chatBoxDivs = document.querySelectorAll('.chat-box');
-          console.log(chatBoxDivs)
-          console.log(chatBoxDivs[0].children)
+          var chatBoxDivs = document.querySelectorAll('#chat-box-' + current_conversation_id);
+          // console.log(chatBoxDivs)
+          // console.log(chatBoxDivs[0].children)
           var lastChatBoxDiv = chatBoxDivs[0].children[chatBoxDivs[0].children.length - 1];
           
           // Create a new span element
@@ -1133,110 +1243,12 @@
           lastChatBoxDiv.setAttribute("title", "Failed to send message. Click to send again.");
           lastChatBoxDiv.onclick = function() {
             lastChatBoxDiv.remove();
-            sendMessage(event, message);
+            sendMessage(event, message, true);
           };
           lastChatBoxDiv.appendChild(element);
         }
       });
     }
-
-    // var socket = io.connect('http://localhost:5000');
-
-    // socket.on('connect', function() {
-    //     console.log('Connected to the server');
-    // });
-
-    // socket.on('message_received', function(data) {
-        
-      // var conversationElement = $("#chat" + current_conversation_id);
-      // var chatsContainer = $("#chats");
-
-      // // Check if the conversation is already at the top
-      // if (!conversationElement.is(chatsContainer.children().first())) {
-      //     // Add the class to trigger the animation
-      //     conversationElement.addClass("new-message");
-
-      //     // Move the conversation element to the top of the list
-      //     chatsContainer.prepend(conversationElement);
-
-      //     // Remove the class after the animation is complete
-      //     setTimeout(function() {
-      //         conversationElement.removeClass("new-message");
-      //     }, 500); // 500ms should match the animation duration
-      // }
-        
-      // var received_message = data.data.messages[0];
-      // if(received_message.attachments.length > 0){
-      //   for (var j = 0; j < received_message.attachments.length; j++) {
-      //     var attachment = received_message.attachments[j];
-      //     var attachmentElement;
-      //     // console.log(attachment.type)
-      //     if (attachment.type.includes("image")) {
-      //       attachmentElement = `<img src="${attachment.url}" alt="Sent Image">`;
-      //     } 
-      //     else if (attachment.type.includes("video")) {
-      //       attachmentElement = `
-      //         <div class="d-flex justify-content-between">
-      //             <span>${attachment.name}</span>
-      //             <a href="${attachment.url}" target="_blank" download>
-      //                 <i class="fas fa-download"></i>
-      //             </a>
-      //         </div>
-      //       `;
-      //     }
-      //     else if (attachment.type.includes("application")) {
-      //       attachmentElement = `
-      //         <div class="d-flex justify-content-between">
-      //             <span>${attachment.name}</span>
-      //             <a href="${attachment.url}" target="_blank" download>
-      //                 <i class="fas fa-download"></i>
-      //             </a>
-      //         </div>
-      //       `;
-      //     }
-
-      //     $('.chat-box').append(`
-      //         <div class='d-flex'>
-      //             <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
-      //             <div class="chat-message">
-      //                 <div class="chat-bubble-response">
-      //                     ${attachmentElement}
-      //                 </div>
-      //             </div>
-      //         </div>
-      //     `);
-      //     var element = document.querySelector(".chat-box");
-      //     element.scrollTop = element.scrollHeight;
-      //   }
-      // }
-      // else{
-      //   $('.chat-box').append(`
-      //     <div class='d-flex'>
-      //       <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
-      //       <div class="chat-message">
-      //           <div class="chat-bubble-response">${received_message.message}</div>
-      //       </div>
-      //     </div>
-      //   `);
-      //   var element = document.querySelector(".chat-box");
-      //   element.scrollTop = element.scrollHeight;
-      // }
-
-    //     // if(current_conversation_id){
-    //     //   $('.chat-box').append(`
-    //     //     <div class='d-flex'>
-    //     //       <input type="radio" name="radio" onclick="allowToEnterChatModal('${current_conversation_id}', '${data}')">
-    //     //       <div class="chat-message">
-    //     //           <div class="chat-bubble-response">${data.message}</div>
-    //     //       </div>
-    //     //     </div>
-    //     //   `);
-    //     //   var element = document.querySelector(".chat-box");
-    //     //   element.scrollTop = element.scrollHeight;
-    //     // }
-    //     // Call your JavaScript function here
-    //     // yourFunction();
-    // });
 
     function checkForMessage() {
       // Make an AJAX request to the server
@@ -1249,26 +1261,47 @@
             // Do something with the message
           // console.log("Received message from the server: " + JSON.stringify(data));
 
-          if(data != 'no message received'){
-            var conversationElement = $("#chat" + data.data.conversation_id);
-            var chatsContainer = $("#chats");
-
-            // Check if the conversation is already at the top
-            if (!conversationElement.is(chatsContainer.children().first())) {
-              // Add the class to trigger the animation
-              conversationElement.addClass("new-message");
-
-              // Move the conversation element to the top of the list
-              chatsContainer.prepend(conversationElement);
-
-              // Remove the class after the animation is complete
-              setTimeout(function() {
-                  conversationElement.removeClass("new-message");
-              }, 500); // 500ms should match the animation duration
-            }
+          if(data != 'no message received' && data.data.conversation_id){
+            conversationUpAnimation(data.data.conversation_id);
               
             const notificationSound = document.getElementById("notificationSound");
             notificationSound.play();
+
+            const currentDate = new Date();
+            const timestamp = new Date(data.data.messages[0].timestamp);
+            var formattedDate = currentDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+            $('#timestamp' + data.data.conversation_id).text(formattedDate)
+            $('#chat' + data.data.conversation_id).addClass('unread')
+
+            if(data.data.messages[0].attachments.length > 0){
+              $('#last_message' + data.data.conversation_id).text('Attachment')
+            }
+            else{
+              $('#last_message' + data.data.conversation_id).text(data.data.messages[0].message)
+            }
+            
+            if(!$('#chat-box-' + data.data.conversation_id).html()){
+              return
+            }
+
+            const timestamp1 = new Date(data.data.messages[0].timestamp);
+            const timestamp2 = new Date($('#chat-box-' + data.data.conversation_id + ' .chat-bubble-response, #chat-box-' + data.data.conversation_id + ' .chat-bubble-send').last().attr('title'));
+            // console.log($('#chat-box-' + data.data.conversation_id))
+            // const timestamp1 = new Date(t1.getTime() + (5 * 60 * 60 * 1000));
+            // const timestamp2 = new Date(t2.getTime() + (5 * 60 * 60 * 1000));
+
+            formattedDate = getFormattedDate(timestamp1, timestamp2);
+            
+            if(formattedDate){
+              $('#chat-box-' + data.data.conversation_id).append(`
+                <div class="d-flex justify-content-center">
+                  <div class="chat-date">
+                    ${formattedDate}
+                  </div>
+                </div>
+              `);
+            }
 
             var received_message = data.data.messages[0];
             if(received_message.attachments.length > 0){
@@ -1300,80 +1333,40 @@
                   `;
                 }
 
-                if(current_conversation_id == data.data.conversation_id){
-                  $('.chat-box').append(`
+                // if(current_conversation_id == data.data.conversation_id){
+                  $('#chat-box-' + data.data.conversation_id).append(`
                     <div class='d-flex'>
                         <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
                         <div class="chat-message">
-                            <div class="chat-bubble-response">
+                            <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(received_message.timestamp)}" class="chat-bubble-response">
                                 ${attachmentElement}
                             </div>
                         </div>
                     </div>
                   `);
-                  var element = document.querySelector(".chat-box");
+                  var element = document.querySelector("#chat-box-" + current_conversation_id);
                   element.scrollTop = element.scrollHeight;
-                }
-                
-                $('#last_message' + data.data.conversation_id).text('Attachment')
+                // }
                 
               }
             }
             else{
-              if(current_conversation_id == data.data.conversation_id){
-                $('.chat-box').append(`
+              // if(current_conversation_id == data.data.conversation_id){
+                $('#chat-box-' + data.data.conversation_id).append(`
                   <div class='d-flex'>
                     <input type="radio" name="radio" onclick="allowToEnterChatModal('123', '${received_message.timestamp}')">
                     <div class="chat-message">
-                        <div class="chat-bubble-response">${received_message.message}</div>
+                      <div data-toggle="tooltip" data-placement="top" title="${getFormattedDateForMessage(received_message.timestamp)}" class="chat-bubble-response">
+                        ${received_message.message.replace(/\n$/, '').replace(/\n/g, '<br>')}
+                      </div>
                     </div>
                   </div>
                 `);
-                var element = document.querySelector(".chat-box");
+                var element = document.querySelector("#chat-box-" + current_conversation_id);
                 element.scrollTop = element.scrollHeight;
-              }
+              // }
               
-              $('#last_message' + data.data.conversation_id).text(received_message.message)
             }
-
-            const currentDate = new Date();
-            const timestamp = new Date(data.data.messages[0].timestamp);
-            // Calculate the time difference in milliseconds between the two dates
-            const timeDifferenceInMilliseconds = Math.abs(currentDate - timestamp);
-
-            // Calculate the number of days between the two dates
-            const daysDifference = Math.round(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-            // console.log(daysDifference)
-            if (daysDifference < 1){
-              const options = {
-                // weekday: 'short',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-              };
-              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp);
-            }else if (daysDifference <= 6) { // Checking if it's within a week (7 days)
-              const options = {
-                weekday: 'short',
-                // hour: 'numeric',
-                // minute: 'numeric',
-                // hour12: true
-              };
-              formattedDate = new Intl.DateTimeFormat('en-US', options).format(timestamp); // Output: Wed 6:14 PM
-            } else {
-              // Display the original format, e.g., "Jul 25, 2023, 6:14 PM"
-              formattedDate = new Intl.DateTimeFormat('en-US', {
-                // year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                // hour: 'numeric',
-                // minute: 'numeric',
-                // hour12: true
-              }).format(timestamp);
-            }
-            
-            $('#timestamp' + data.data.conversation_id).text(formattedDate)
-            $('#chat' + data.data.conversation_id).addClass('unread')
           }
         },
         error: function (xhr, status, error) {
@@ -1383,14 +1376,14 @@
       });
     }
 
-    // Set up a timer to check for messages every 3 seconds
+    // Set up a timer to check for messages every 1 seconds
     setInterval(checkForMessage, 1000);
 
     var current_tab = 'all';
 
     function switchTab(page_id, access_token, platform){
       current_tab = platform
-      console.log(current_tab)
+      // console.log(current_tab)
       getConversations(page_id, access_token, current_tab)
       $('.tab-pills').removeClass('active')
       $('#' + platform).addClass('active')
@@ -1439,7 +1432,7 @@
               console.log("Contact added successfully");
               $('#contactModal').modal('hide');
 
-              $('#contact-info').html(`
+              $('#contact-info-' + current_conversation_id).html(`
               <div class="contact-details">
                 <div class="d-flex justify-content-between">
                   <p>Added Details</p>
@@ -1519,7 +1512,7 @@
             console.log("Contact edited successfully");
             $('#editContactModal').modal('hide');
 
-            $('#contact-info').html(`
+            $('#contact-info-' + current_conversation_id).html(`
               <div class="contact-details">
                 <div class="d-flex justify-content-between">
                   <p>Added Details</p>
@@ -1549,32 +1542,6 @@
       access_token = selectedArray[1];
       page_name = $('#changePage option:selected').text();
       switchTab(page_id, access_token, current_tab)
-    }
-
-    function addToTotalSale(){
-        //fetch data from form
-        var form = document.getElementById('form');            
-        $.ajax({
-            url: '/addSale',
-            type: 'POST',
-            data: new FormData(form),
-            processData: false,
-            contentType: false,
-            success: function(data) {
-                $('#modal').modal('hide')
-                toastr.success('Sale Added');
-                $('#form').trigger("reset");
-                // Get the current date in the format "YYYY-MM-DD"
-                const today = new Date().toISOString().split('T')[0];
-                // Set the default value of the date input to today's date
-                document.getElementById('date').value = today;
-                $('#sheets').val('Total Sales')
-                // loadSheetData('Total Sales');
-            },
-            error: function(error) {
-                toastr.error(error);
-            }
-        });
     }
 
 </script>

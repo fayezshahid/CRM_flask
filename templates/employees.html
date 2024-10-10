@@ -37,7 +37,7 @@
                                         <option value="3">Operation</option>
                                         <option value="4">Developer/Designer</option> -->
                                         {% for page in pages %}
-                                            <option value="{{ page.id }}">{{ page.name }}</option>
+                                            <option value="{{ page.id }}">{{ page.page_name }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -187,6 +187,8 @@
 
         function editEmployee(id){
             var form = document.getElementById('form' + id);
+            // let tmp = new FormData(form);
+            // console.log(tmp);
             $.ajax({
                 url: '/editEmployee/' + id,
                 type: 'POST',
@@ -205,6 +207,7 @@
         }
 
         function deleteEmployee(id){
+            console.log(id)
             $.ajax({
                 url: '/deleteEmployee/' + id,
                 type: 'POST',

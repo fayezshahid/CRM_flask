@@ -117,6 +117,16 @@
     align-items: center;
 }
 
+.message-box:nth-child(2) {
+    max-height: 50px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.message-box:nth-child(2):first-child {
+    overflow: hidden;
+}
+
 .message-box input{
     border: none;
     border-radius: 4px;
@@ -138,7 +148,7 @@ input[type="radio"] {
 }
 
 .chat-box {
-    height: 85%;
+    height: 80%;
     overflow-y: scroll;
 }
 .chat-message{

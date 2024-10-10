@@ -145,71 +145,23 @@
                 $('#table-head').html('')
                 $('#table-body').html('')
                 console.log(data)
-                if(sheet == 'Total Sales'){
-                    var obj = Object.entries(data[0])
-                    $('#table-head').html(`
-                        <tr>
-                            <th>${obj[0][0]}</th>
-                            <th>${obj[1][0]}</th>
-                            <th>${obj[2][0]}</th>
-                            <th>${obj[3][0]}</th>
-                            <th>${obj[4][0]}</th>
-                            <th>${obj[5][0]}</th>
-                            <th>${obj[6][0]}</th>
-                            <th>${obj[7][0]}</th>
-                            <th>${obj[8][0]}</th>
-                            <th>${obj[9][0]}</th>
-                            <th>${obj[10][0]}</th>
-                            <th>${obj[11][0]}</th>
-                            <th>${obj[12][0]}</th>
-                            <th>${obj[13][0]}</th>
-                        </tr>
-                    `)
-                    for(var i=0; i<data.length; i++){
-                        var obj = Object.entries(data[i])
-                        $('#table-body').append(`
-                            <tr>
-                                <td>${obj[0][1]}</td>
-                                <td>${obj[1][1]}</td>
-                                <td>${obj[2][1]}</td>
-                                <td>${obj[3][1]}</td>
-                                <td>${obj[4][1]}</td>
-                                <td>${obj[5][1]}</td>
-                                <td>${obj[6][1]}</td>
-                                <td>${obj[7][1]}</td>
-                                <td>${obj[8][1]}</td>
-                                <td>${obj[9][1]}</td>
-                                <td>${obj[10][1]}</td>
-                                <td>${obj[11][1]}</td>
-                                <td>${obj[12][1]}</td>
-                                <td>${obj[13][1]}</td>
-                            </tr>
-                        `)
-                    }
+                var headers = data[0];
+                var headerHTML = '<tr>';
+                for (var i = 0; i < headers.length; i++) {
+                    headerHTML += '<th>' + headers[i] + '</th>';
                 }
-                else{
-                    var obj = Object.entries(data[0])
-                    $('#table-head').html(`
-                        <tr>
-                            <th>${obj[0][0]}</th>
-                            <th>${obj[1][0]}</th>
-                            <th>${obj[2][0]}</th>
-                            <th>${obj[3][0]}</th>
-                            <th>${obj[4][0]}</th>
-                        </tr>
-                    `)
-                    for(var i=0; i<data.length; i++){
-                        var obj = Object.entries(data[i])
-                        $('#table-body').append(`
-                            <tr>
-                                <td>${obj[0][1]}</td>
-                                <td>${obj[1][1]}</td>
-                                <td>${obj[2][1]}</td>
-                                <td>${obj[3][1]}</td>
-                                <td>${obj[4][1]}</td>
-                            </tr>
-                        `)
+                headerHTML += '</tr>';
+                $('#table-head').html(headerHTML);
+
+                data = data[1]
+                for (var i = 0; i < data.length; i++) {
+                    var row = data[i];
+                    var rowHTML = '<tr>';
+                    for (var j = 0; j < row.length; j++) {
+                        rowHTML += '<td>' + row[j] + '</td>';
                     }
+                    rowHTML += '</tr>';
+                    $('#table-body').append(rowHTML);
                 }
             }
         })

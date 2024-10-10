@@ -1,4 +1,6 @@
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'mntgedkh_mntgedkh'
-app.config['MYSQL_PASSWORD'] = '0[-xS19@64#&*#hJyi"F+'
-app.config['MYSQL_DB'] = 'mntgedkh_crm'
+sql = mysql.connector.connect(
+  host="localhost",
+  user="mntpqgaj_mntpqgaj",
+  password="ypiJYMJF6@GLsjU",
+  database="mntpqgaj_crm"
+)

@@ -14,11 +14,11 @@
                             <form id="form">
                                 <div class="form-group">
                                     <label for="">Page Name</label>
-                                    <input type="text" id="name" class="form-control" name="name" placeholder="Enter Page Name">
+                                    <input type="text" id="page_name" class="form-control" name="page_name" placeholder="Enter Page Name">
                                 </div>
                                 <div class="form-group">
                                     <label for="">Page ID</label>
-                                    <input type="text" id="id" class="form-control" name="id" placeholder="Enter Page ID">
+                                    <input type="text" id="page_id" class="form-control" name="page_id" placeholder="Enter Page ID">
                                 </div>
                                 <div class="form-group">
                                     <label for="">Page Access Token</label>
@@ -87,12 +87,12 @@
                         var displayedToken = data[i].access_token.substr(0, 10) + "........." + data[i].access_token.substr(-10);
                         var element = '';
                         for(var j=0; j<sheets.length; j++){
-                            element += `<option value="${sheets[j]}" ${sheets[j] == data[i].sheet ? 'selected' : ''}>${sheets[j]}</option>`
+                            element += `<option value="${sheets[j] != 'Select a Sheet' ? sheets[j] : ''}" ${sheets[j] == data[i].sheet ? 'selected' : ''}>${sheets[j]}</option>`
                         }
                         $('tbody').append(`
                             <tr>
-                                <td>${data[i].name}</td>
-                                <td>${data[i].id}</td>
+                                <td>${data[i].page_name}</td>
+                                <td>${data[i].page_id}</td>
                                 <td>${displayedToken}</td>
                                 <td>${data[i].sheet}</td>
                                 <td>
@@ -105,15 +105,15 @@
                                                     <div>
                                                         <form id="form${data[i].id}">
                                                             <div class="form-group">
-                                                                <label for="">Name</label>
-                                                                <input type="text" id="name${data[i].id}" class="form-control" name="name" value="${data[i].name}" placeholder="Enter Page Name">
+                                                                <label for="">Page Name</label>
+                                                                <input type="text" id="page_name${data[i].id}" class="form-control" name="page_name" value="${data[i].page_name}" placeholder="Enter Page Name">
                                                             </div>
                                                             <div class="form-group">
-                                                                <label for="">Password</label>
-                                                                <input type="text" id="id${data[i].id}" class="form-control" name="id" value="${data[i].id}" placeholder="Enter Page ID">
+                                                                <label for="">Page ID</label>
+                                                                <input type="text" id="page_id${data[i].id}" class="form-control" name="page_id" value="${data[i].page_id}" placeholder="Enter Page ID">
                                                             </div>
                                                             <div class="form-group">
-                                                                <label for="">Password</label>
+                                                                <label for="">Page Access Token</label>
                                                                 <input type="text" id="access_token${data[i].id}" class="form-control" name="access_token" value="${data[i].access_token}" placeholder="Enter Page Access Token">
                                                             </div>
                                                             <div class="form-group">

@@ -75,10 +75,94 @@
                   <span class="icon-text">Sheets</span>
                 </a>
               </div>
+              <button class="btn btn-primary" data-toggle="modal" data-target="#TotalSalesModal">Add Total Sales</button>
             </li>
           </ul>
         <!-- </div> -->
       </nav>
+
+      <div class="modal fade" id="TotalSalesModal" tabindex="-1" role="dialog" aria-labelledby="TotalSalesModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+                <form id="TotalSalesForm">
+                    <div class="input-group justify-content-between">
+                        <div class="form-group">
+                            <label for="name">A.Name:</label>
+                            <input type="text" class="form-control" id="name" name="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date:</label>
+                            <input type="date" style="width: 100%;" class="form-control" id="date" name="date">
+                        </div>
+                    </div>
+                    <div class="input-group justify-content-between">
+                        <div class="form-group">
+                            <label for="clientName">Client Name:</label>
+                            <input type="text" class="form-control" id="clientName" name="clientName">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact">Contact:</label>
+                            <input type="tel" class="form-control" id="contact" name="contact">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="input-group justify-content-between">
+                        <div class="form-group">
+                            <label for="projectName">Project Name:</label>
+                            <input type="text" class="form-control" id="projectName" name="projectName">
+                        </div>
+                        <div class="form-group">
+                            <label for="product">Product:</label>
+                            <input type="text" class="form-control" id="product" name="product">
+                        </div>
+                    </div>
+                    <div class="input-group justify-content-between">
+                        <div class="form-group">
+                            <label for="received">Received:</label>
+                            <input type="text" class="form-control" id="received" name="received">
+                        </div>
+                        <div class="form-group">
+                            <label for="source">Source:</label>
+                            <input type="text" class="form-control" id="source" name="source">
+                        </div>
+                    </div>
+                    <div class="input-group justify-content-between">
+                        <div class="form-group" style="width: 35%;">
+                            <label for="totalCost">Total Cost:</label>
+                            <input type="text" style="width: 90%;" class="form-control" id="totalCost" name="totalCost">
+                        </div>
+                        <div class="form-group" style="width: 30%;">
+                            <label for="upfront">Upfront:</label>
+                            <input type="text" style="width: 90%;" class="form-control" id="upfront" name="upfront">
+                        </div>
+                        <div class="form-group" style="width: 35%;">
+                            <label for="remaining">Remaining:</label>
+                            <input type="text" class="form-control" id="remaining" name="remaining">
+                        </div>
+                    </div>
+                    <div class="input-group justify-content-between">
+                        <div class="form-group">
+                            <label for="status">Status:</label>
+                            <input type="text" class="form-control" id="status" name="status">
+                        </div>
+                        <div class="form-group">
+                            <label for="remarks">Remarks:</label>
+                            <textarea id="remarks" class="form-control" name="remarks"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" onclick="addToTotalSale()">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Page Content -->
       <main role="main" style="margin: 0px !important;" class="col-11">
@@ -109,10 +193,10 @@
       $.get('/getPages', function(data){
         data.forEach(function(page){
           $('#pages').css('margin-top', '5px')
-          el = $('<a class="pages" href="/chat/' + page.id + '" id="' + page.id + '">' + page.name + '</a>')
+          el = $('<a class="pages" href="/chat/' + page.page_id + '" id="' + page.page_id + '">' + page.page_name + '</a>')
           $('#pages').append(el);
           try {
-            if (page_id == page.id) {
+            if (page_id == page.page_id) {
               el.addClass('active')
             }
           } catch (error) {
@@ -125,6 +209,32 @@
     function toggleChat() {
       $('#pages').toggle();
     }
+
+    function addToTotalSale(){
+      //fetch data from form
+      var form = document.getElementById('form');            
+      $.ajax({
+          url: '/addSale',
+          type: 'POST',
+          data: new FormData(form),
+          processData: false,
+          contentType: false,
+          success: function(data) {
+              $('#modal').modal('hide')
+              toastr.success('Sale Added');
+              $('#TotalSalesForm').trigger("reset");
+              // Get the current date in the format "YYYY-MM-DD"
+              const today = new Date().toISOString().split('T')[0];
+              // Set the default value of the date input to today's date
+              document.getElementById('date').value = today;
+              $('#sheets').val('Total Sales')
+              // loadSheetData('Total Sales');
+          },
+          error: function(error) {
+              toastr.error(error);
+          }
+      });
+  }
 
   </script>
   {% block scripts %}
